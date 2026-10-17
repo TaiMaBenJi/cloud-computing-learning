@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>云计算 · 竞赛学习项目</title>
+<meta name="description" content="零基础到赛场的云计算备赛项目：30 天作战板、7 套全真模拟卷、21 套公开真题、OpenStack/K8s 一键实验、20 章保姆级教程。">
+<meta name="theme-color" content="#0e1b33">
+<style>
+:root{--bg:#f3f6fb;--text:#16233c;--dim:#5b6b85;--line:#dde5f0;--blue:#2b5cd9;--deep:#12408f;--gold:#c98a1c;--green:#0f9d6c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Source Han Sans SC","Noto Sans SC",sans-serif;line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 70px}
+.hero{background:radial-gradient(1200px 500px at 15% -10%,rgba(43,92,217,.55),transparent 60%),linear-gradient(150deg,#0b1730,#14284f 55%,#1d3a72);color:#fff;padding:54px 20px 46px}
+.hero .in{max-width:980px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:3px;color:#9fb7e8;font-weight:700}
+h1{margin:8px 0 6px;font-size:30px;line-height:1.35;font-weight:900}
+.hero p{margin:6px 0;color:#c9d8f5;font-size:14.5px;max-width:720px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.badges span{font-size:12px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);border-radius:999px;padding:4px 12px}
+.cd{margin-top:18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.cd b{font-size:22px}
+.cd .go{background:#fff;color:#12408f;border-radius:9px;font-weight:800;padding:8px 16px;font-size:13.5px}
+h2.sec{font-size:17px;margin:34px 0 12px;letter-spacing:.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:0 1px 3px rgba(16,32,60,.05);display:flex;flex-direction:column}
+.card .ico{font-size:22px}
+.card h3{margin:6px 0 4px;font-size:15.5px}
+.card p{margin:0 0 10px;font-size:13px;color:var(--dim)}
+.card .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.card .tags span{font-size:11px;color:#31519e;background:#edf2fd;border:1px solid rgba(43,92,217,.25);border-radius:6px;padding:1px 8px}
+.card.big{grid-column:span 2}
+@media(max-width:700px){.card.big{grid-column:span 1}h1{font-size:24px}}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px}
+th,td{padding:9px 12px;border-bottom:1px solid #eef3fa;text-align:left;vertical-align:top}
+th{background:#f7f9fd;font-size:12.5px;color:#44557a;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.note{background:#fff8e8;border:1px solid #f0d9a8;border-radius:12px;padding:12px 16px;font-size:13px;color:#6b4c00}
+.foot{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:#7a8aa6}
+.foot a{color:#31519e}
+</style>
+</head>
+<body>
+<header class="hero"><div class="in">
+  <div class="kicker">CLOUD COMPUTING · LEARNING PROJECT</div>
+  <h1>云计算 · 竞赛学习项目</h1>
+  <p>零基础 → 省赛 → 国赛 → 世赛，一条能直接照着跑的备赛线。<b>30 天作战板 · 7 套全真模拟卷 · 21 套公开真题 · 一键实验环境 · 20 章保姆级教程</b></p>
+  <div class="badges"><span>零基础可入</span><span>全真计时模拟</span><span>离线可用</span><span>持续更新</span></div>
+  <div class="cd" id="cdBox" style="display:none">
+    <div>🎯 <b id="cdDays">—</b> 天后比赛</div>
+    <a class="go" href="start.html">打开 30 天作战板 →</a>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <h2 class="sec">🚀 从这里开始</h2>
+  <div class="grid">
+    <a class="card big" href="start.html" style="color:inherit">
+      <div class="ico">📅</div>
+      <h3>首赛倒计时 · 30 天作战板</h3>
+      <p>第一次参赛？填上比赛日期，每天告诉你「今天做什么」：装机 → 服务 → 私有云 → 容器云 → 全真模拟，打勾存档。</p>
+      <div class="tags"><span>新手首选</span><span>⭐ 核心天</span><span>进度本地保存</span></div>
+    </a>
+    <a class="card big" href="sim/index.html" style="color:inherit">
+      <div class="ico">🏟️</div>
+      <h3>全赛模拟中心 · 7 套全真卷</h3>
+      <p>省赛真题 / 国赛结构卷 / 2023 国赛真题 / 世职赛 / 金砖 / 韩国世赛真题 2025 / WSC2026 四日模考。计时、逐项评分、交卷成绩单。</p>
+      <div class="tags"><span>真实赛制</span><span>断点续做</span><span>真题原文</span></div>
+    </a>
+    <a class="card" href="labs/README.md" style="color:inherit">
+      <div class="ico">🧪</div>
+      <h3>真机实验室</h3>
+      <p>三条环境路线 + OpenStack/K8s 一键脚本 + 四层通关任务书（自动评分）。</p>
+      <div class="tags"><span>一键脚本</span><span>L1→L4</span></div>
+    </a>
+    <a class="card" href="docs/tutorial/README-教程总览.md" style="color:inherit">
+      <div class="ico">📚</div>
+      <h3>20 章保姆级教程</h3>
+      <p>Linux / 网络 / 服务 / HTTPS / DNS / 高可用 / 排障 / Docker / K8s / AWS / 自动化 / 安全…</p>
+      <div class="tags"><span>零基础</span><span>可跟做</span></div>
+    </a>
+    <a class="card" href="papers/真题题库-21套.md" style="color:inherit">
+      <div class="ico">🗂️</div>
+      <h3>21 套公开真题题库</h3>
+      <p>2022/2023 国赛卷、广东 2024 样题①-⑤、河北/贵州/广西/江西/安徽/河南省赛卷全文收录。</p>
+      <div class="tags"><span>全文</span><span>可溯源</span></div>
+    </a>
+    <a class="card" href="papers/korea-zh/" style="color:inherit">
+      <div class="ico">🇰🇷</div>
+      <h3>韩国世赛真题（中译）</h3>
+      <p>2021–2025 题面 + 评分标准，世赛同源的 AWS 全套任务：ECS / Aurora / DynamoDB / CloudFront / WAF。</p>
+      <div class="tags"><span>世赛线</span><span>评分标准</span></div>
+    </a>
+    <a class="card" href="resources/" style="color:inherit">
+      <div class="ico">📜</div>
+      <h3>官方标准与规程</h3>
+      <p>WSOS 2026 中文全文 · WSC2026 TD53 中文导读与英文原件 · 金砖 BRICS-FS-11 技术规程。</p>
+      <div class="tags"><span>第一手依据</span></div>
+    </a>
+    <a class="card" href="week1.html" style="color:inherit">
+      <div class="ico">🌱</div>
+      <h3>七天开蒙卡</h3>
+      <p>零基础第一周：从装 Linux 到把网站跑起来，每天 30-60 分钟。</p>
+      <div class="tags"><span>D1 起点</span></div>
+    </a>
+    <a class="card" href="sprint.html" style="color:inherit">
+      <div class="ico">⚡</div>
+      <h3>30 天冲刺手册</h3>
+      <p>赛项分值解剖、四周日历、必背模板 Top 20、考场检查单。</p>
+      <div class="tags"><span>方法论</span></div>
+    </a>
+  </div>
+
+  <h2 class="sec">🏆 7 套全真卷一览</h2>
+  <table>
+    <thead><tr><th>卷</th><th>依据</th><th>时长</th><th>入口</th></tr></thead>
+    <tbody>
+      <tr><td>省赛真题卷 · 2024 广东样题①</td><td>公开赛卷原文</td><td>240 min</td><td><a href="sim/sim.html?paper=guangdong">开始</a></td></tr>
+      <tr><td>国赛结构卷 · GZ075 三模块</td><td>2023 国赛公开结构</td><td>390 min</td><td><a href="sim/sim.html?paper=nation">开始</a></td></tr>
+      <tr><td>国赛真题卷 · 2023 赛卷 1</td><td>公开赛卷原文</td><td>390 min</td><td><a href="sim/sim.html?paper=nation2023">开始</a></td></tr>
+      <tr><td>世职赛团队卷</td><td>2025 教育部赛制</td><td>70 min</td><td><a href="sim/sim.html?paper=wsjobs">开始</a></td></tr>
+      <tr><td>金砖卷 · BRICS-FS-11</td><td>2024 规程原件</td><td>240 min</td><td><a href="sim/sim.html?paper=brics">开始</a></td></tr>
+      <tr><td>韩国世赛真题卷 2025</td><td>真题原文中译</td><td>480 min</td><td><a href="sim/sim.html?paper=korea2025">开始</a></td></tr>
+      <tr><td>WSC2026 上海世赛四日模考</td><td>TD53 + WSOS 官方标准</td><td>4×半天</td><td><a href="sim/sim.html?paper=wsc2026">开始</a></td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">📌 说明</h2>
+  <div class="note">
+    <b>来源与合规</b>：真题文本来自公开渠道（CSDN 等，多为 CC BY-SA），保留来源链接，仅供学习研究；官方标准文件版权归 WorldSkills / 金砖组委会等原机构，此处仅作学习引用。<br>
+    <b>姊妹项目</b>：完整版（62 集视频课 · 50 个世赛赛项 · 全站资源库）见 <a href="https://github.com/TaiMaBenJi/knowledge-commons">知识公社 knowledge-commons</a> · <a href="https://taimabenji.github.io/knowledge-commons/">在线版</a>
+  </div>
+
+  <footer class="foot">
+    <p>云计算 · 竞赛学习项目 · 内容完全离线可用 · 欢迎 Issue / PR 补充真题与修正</p>
+    <p>比赛不是背出来的，是一套一套卷打出来的。从 Day 1 开始。💪</p>
+  </footer>
+</div>
+<script>
+/* 读取作战板保存的比赛日期（localStorage 共享键），有则显示倒计时 */
+(function(){
+  try{
+    var d=localStorage.getItem('kcstart.date');
+    if(!d) return;
+    var t=new Date();t.setHours(0,0,0,0);
+    var e=new Date(d+'T00:00:00');e.setHours(0,0,0,0);
+    var n=Math.round((e-t)/86400000);
+    if(n<0) return;
+    document.getElementById('cdDays').textContent=n===0?'今天':n;
+    document.getElementById('cdBox').style.display='flex';
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
