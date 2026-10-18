@@ -83,7 +83,6 @@ color:var(--dim);font-family:var(--serif)}
 .prog{height:9px;background:#eceff3;border-radius:5px;overflow:hidden;margin:8px 0}
 .prog i{display:block;height:100%;background:linear-gradient(90deg,#9e2b25,#4c6b4f);border-radius:5px}
 #err{background:#7d201c;color:#fff;padding:9px 13px;border-radius:6px;margin:10px 0;font-size:13px;display:none}
-</style>
 /* ================= 模拟实训室 · 终端 UI ================= */
 #labView{position:fixed;inset:0;z-index:160;background:#f7f7f5;display:none;flex-direction:column}
 #labView.on{display:flex}
@@ -216,6 +215,27 @@ padding:3px 10px;font-size:11.5px;cursor:pointer;font-family:inherit;white-space
   .tv-pad{padding:6px 8px}
 }
 
+/* ================= 考试/竞赛面板通用卡片样式 =================
+   说明：这几类原本由宿主页面的 CSS 提供（study.html / sim/*.html），
+   arena.html 是独立单文件，没有宿主，所以必须自带，否则考试面板是「裸」的。 */
+.qz-item{background:#fff;border:1px solid rgba(255,255,255,.16);border-radius:12px;
+padding:14px 16px;margin:0 0 12px;color:#e6edf3}
+.qz-item h4{margin:0 0 8px;font-size:15px;font-weight:700}
+.lab-sub{margin:6px 0 0;font-size:12.5px;line-height:1.7;color:#8b949e}
+.qz-btn{display:inline-block;border:1px solid #1a6fe8;background:#1a6fe8;color:#fff;
+border-radius:10px;padding:8px 15px;font-size:13px;font-weight:700;cursor:pointer;
+margin:8px 8px 0 0;font-family:inherit}
+.qz-btn.ghost{background:transparent;color:#6ea8fe;border-color:rgba(110,168,254,.5)}
+.qz-btn:active{transform:scale(.97)}
+.qz-btn.ok{background:#1f883d;border-color:#1f883d}
+.qz-btn.why{background:transparent;color:#8b949e;border-color:rgba(139,148,158,.35)}
+.pill{display:inline-block;background:rgba(110,168,254,.14);color:#9ecbff;border:1px solid rgba(110,168,254,.35);
+border-radius:999px;padding:1px 9px;font-size:11.5px;margin:0 4px 4px 0;white-space:nowrap}
+.qa{margin:8px 0 0;padding-left:20px;font-size:13.5px;line-height:1.85}
+.exam-head{display:flex;align-items:center;gap:10px}
+.checklist{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+
+</style>
 </head>
 <body>
 <div class="topbar"><span class="dot"></span><span>云计算模拟考场 · 虚拟 Linux 服务器 + 竞赛仿真场 + 7 套全真卷 · 零依赖 · 断网可用</span></div>

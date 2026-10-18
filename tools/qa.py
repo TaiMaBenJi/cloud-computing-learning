@@ -12,6 +12,7 @@ qa.py —— 本仓库质量守门人
   4 Shell 脚本语法（bash -n）
   5 HTML 结构（标签闭合平衡）
   6 单文件产物自包含性（arena.html 不得有外部 script/css）
+  7 样式注入与 UI 类契约（防「整段 CSS 当正文显示」与「UI 类无样式」）
 
 历史教训：本仓库曾出现两处 U+FFFD（start.html 的「断网」、
 备赛课程第 4 讲的配音脚本「密钥登录」），后者还会被渲染进视频画面与
@@ -206,10 +207,60 @@ if os.path.exists(arena):
 else:
     print("  – arena.html 未生成（跳过）")
 
+# ---------------------------------------------------------------- 7 样式与 UI 契约
+print("7. 样式注入与 UI 类契约（本项防「整段 CSS 当正文显示」这类事故）")
+arena_p = os.path.join(ROOT, "arena.html")
+if os.path.exists(arena_p):
+    a_s = rd(arena_p)
+    probs = []
+    # 7a 样式块必须包含 lab.css 的关键选择器
+    m = re.search(r"<style[^>]*>(.*?)</style>", a_s, re.S)
+    if not m:
+        probs.append("找不到 <style> 块")
+    else:
+        blk = m.group(1)
+        for mark in ("#labView", "#termView", "#tvIn", ".tv-chip", ".exam-clock"):
+            if mark not in blk:
+                probs.append("lab.css 关键选择器 %s 不在 <style> 内" % mark)
+    # 7b body 里不能出现裸 CSS/JS 源码
+    if "<body>" in a_s and "<script>" in a_s:
+        seg = a_s[a_s.index("<body>"):a_s.index("<script>")]
+        vis = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", seg))
+        for w in ("display:", "position:fixed", "border-radius:", "font-family:"):
+            if w in vis:
+                probs.append("body 可见文本里出现裸 CSS（%s）—— 样式泄漏成正文" % w)
+        if len(vis) > 6000:
+            probs.append("body 可见文本 %d 字符，过长，疑似泄漏" % len(vis))
+    # 7c lab-ui / competition-ui 运行时用到的 class 必须有样式
+    css_all = m.group(1) if m else ""
+    defined = set(re.findall(r"\.([a-zA-Z][\w-]*)", css_all))
+    ui = ""
+    for fn in ("lab/lab-ui.js", "lab/competition-ui.js"):
+        fp = os.path.join(ROOT, fn)
+        if os.path.exists(fp):
+            ui += rd(fp)
+    used = set()
+    for mm in re.finditer(r'class=["\']([^"\']+)["\']', ui):
+        used.update(mm.group(1).split())
+    for mm in re.finditer(r'className\s*=\s*["\']([^"\']+)["\']', ui):
+        used.update(mm.group(1).split())
+    used = {c for c in used if c and not c.startswith("on") and "{" not in c and "'" not in c}
+    miss = sorted(used - defined)
+    if miss:
+        probs.append("UI 运行时用到但无样式：%s" % (", ".join("." + x for x in miss)))
+    if probs:
+        for x in probs:
+            print("  ❌ %s" % x)
+        fails.append("样式注入 %d 项" % len(probs))
+    else:
+        print("  ✅ 样式正确注入 <style>，body 无泄漏，UI 类全部有定义")
+else:
+    print("  – arena.html 未生成（跳过）")
+
 # ---------------------------------------------------------------- 汇总
 print("=" * 64)
 if fails:
     print("❌ 未通过：" + "；".join(fails))
     sys.exit(1)
-print("✅ 全部 6 项检查通过")
+print("✅ 全部 7 项检查通过")
 sys.exit(0)

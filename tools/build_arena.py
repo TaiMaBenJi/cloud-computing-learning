@@ -141,8 +141,8 @@ color:var(--dim);font-family:var(--serif)}
 .prog{height:9px;background:#eceff3;border-radius:5px;overflow:hidden;margin:8px 0}
 .prog i{display:block;height:100%;background:linear-gradient(90deg,#9e2b25,#4c6b4f);border-radius:5px}
 #err{background:#7d201c;color:#fff;padding:9px 13px;border-radius:6px;margin:10px 0;font-size:13px;display:none}
+/*LAB_CSS*/
 </style>
-<!--LAB_CSS-->
 </head>
 <body>
 <div class="topbar"><span class="dot"></span><span>云计算模拟考场 · 虚拟 Linux 服务器 + 竞赛仿真场 + 7 套全真卷 · 零依赖 · 断网可用</span></div>
@@ -418,7 +418,7 @@ renderPapers();
 </html>
 """
 
-out = (HTML.replace("<!--LAB_CSS-->", css)
+out = (HTML.replace("/*LAB_CSS*/", css)
            .replace("/*LAB_ENGINE*/", engine)
            .replace("/*LAB_EXTRAS*/", extras)
            .replace("/*LAB_SCENARIOS*/", scen)
@@ -427,6 +427,21 @@ out = (HTML.replace("<!--LAB_CSS-->", css)
            .replace("/*LAB_COMPETITION_UI*/", compui)
            .replace("/*LAB_PAPERS*/", paper_js)
            .replace("__BUILD_DATE__", BUILD_DATE))
+
+# ---- 防呆：占位符必须全部被替换，且 CSS 必须落在 <style> 内 ----
+import re as _re
+_left = _re.findall(r"/\*LAB_[A-Z_]+\*/|<!--LAB_[A-Z_]+-->", out)
+if _left:
+    raise SystemExit("占位符未被替换：%s" % _left)
+_m = _re.search(r"<style[^>]*>(.*?)</style>", out, _re.S)
+if not _m or "#tvIn" not in _m.group(1) or "#labView" not in _m.group(1):
+    raise SystemExit("lab.css 未正确落入 <style>（缺 #tvIn 或 #labView）")
+_b = out[out.index("<body>"):out.index("<script>")]
+_t = _re.sub(r"<[^>]+>", " ", _b)
+for _w in ("display:", "position:fixed", "border-radius:"):
+    if _w in _t:
+        raise SystemExit("body 里出现裸 CSS（%s），说明样式泄漏成正文" % _w)
+print("  ✅ 占位符全部替换 · lab.css 已落入 <style> · body 无裸 CSS")
 
 io.open(OUT, "w", encoding="utf-8").write(out)
 print("  wrote %s  (%.1f KB)" % (OUT, len(out) / 1024.0))
