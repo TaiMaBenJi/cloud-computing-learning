@@ -152,7 +152,7 @@ color:var(--dim);font-family:var(--serif)}
   <p>一个页面装下全部：<b>浏览器里开一台 Linux 服务器</b>（真敲命令、真装服务、真自动评分）、
   <b>5 场竞赛仿真场</b>（含世赛里昂 2024 的 52 个官方评分点）、<b>4 套限时模拟赛</b>、<b>7 套全真模拟卷</b>。
   不用装软件、不用开云账号、<b>断网照考</b>。</p>
-  <div class="badges"><span id="bd-engine">22 个实训场景</span><span id="bd-comp">5 场竞赛仿真</span>
+  <div class="badges"><span>零基础可用</span><span id="bd-engine">22 个实训场景</span><span id="bd-comp">5 场竞赛仿真</span>
   <span id="bd-paper">7 套全真卷</span><span>自动评分</span><span>进度存本机</span></div>
 </header>
 
@@ -164,10 +164,24 @@ color:var(--dim);font-family:var(--serif)}
   <b>手上有 OpenStack / K8s 真集群</b> → 去 <code>sim/index.html</code> 打 7 套全真卷，对真机自评；
   <b>两者结合</b> = 先在虚拟考场把动作练熟，再上真机验收，效率最高。</div>
 
-  <button class="cta" id="goComp">🏟 竞赛仿真场 —— 5 场真实赛事，官方评分点自动判分</button>
-  <button class="cta gold" id="goExam">⏱ 限时模拟赛 —— 4 套，倒计时 / 交卷 / 出报告</button>
-  <button class="cta blue" id="goLab">🧪 虚拟考场 —— 22 个场景，不限时练到会</button>
-  <button class="cta ghost" id="goPapers">📋 全真卷中心 —— 7 套真题，逐条自评打勾</button>
+  <!-- ===== 第一次来的照这个顺序 ===== -->
+  <div class="card" style="border:2px solid #9e2b25;background:#fff8f4">
+    <p><b>👋 第一次来？照这个顺序点，四步就够了</b>（每个按钮都是上面的入口）</p>
+    <ol style="padding-left:22px;margin:8px 0 0">
+      <li><b>先随便玩</b> → 点 <b>🧪 虚拟考场</b>。不用准备什么，它就是一台 Linux 服务器。<br>
+        <span class="small">进来先敲 <code>whoami</code>、<code>ip a</code>、<code>ls</code> 感受一下；每个场景都有「📋 任务」看题、「▶ 示范」看解法。</span></li>
+      <li><b>知道要考什么</b> → 往下滑看 <b>📋 全真卷中心</b>的 7 套真题，了解模块和分值怎么分的。<br>
+        <span class="small">不用现在勾——等你以后有真机了再回来逐条验收。</span></li>
+      <li><b>练比赛节奏</b> → 点 <b>⏱ 限时模拟赛</b>，从「迷你 30 分钟」开始，体验倒计时和交卷判分。</li>
+      <li><b>冲分</b> → 点 <b>🏟 竞赛仿真场</b>。这里有世赛里昂 2024 的 52 个官方评分点，能自动判对错。</li>
+    </ol>
+    <p class="small" style="margin-top:10px"><b>⏱ 大概多久有手感：</b>第一天就能敲命令（虚拟考场随便玩），一周能看懂题目在问什么，一个月能独立做完限时赛。</p>
+  </div>
+
+  <button class="cta blue" id="goLab">① 🧪 先玩一下 —— 虚拟考场（22 场景，自动评分，不需要任何准备）</button>
+  <button class="cta ghost" id="goPapers">② 📋 看看考什么 —— 全真卷中心（7 套真题 331 条检查项）</button>
+  <button class="cta gold" id="goExam">③ ⏱ 练节奏 —— 限时模拟赛（4 套，倒计时/交卷/出报告）</button>
+  <button class="cta" id="goComp">④ 🏟 冲分 —— 竞赛仿真场（5 场赛事，52 个官方评分点自动判分）</button>
 
   <h2 class="sec">虚拟考场是什么</h2>
   <div class="card">

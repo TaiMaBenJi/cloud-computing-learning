@@ -192,6 +192,30 @@ padding:3px 10px;font-size:11.5px;cursor:pointer;font-family:inherit;white-space
 .lost{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:12.5px}
 .lost:last-child{border-bottom:none}
 
+
+/* ================= 移动端适配（刘海屏 / 长按 / 键盘） ================= */
+/* 刘海屏与底部手势条：终端输入区要避开，否则键盘一弹就被遮 */
+#termView{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.tv-pad{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+/* 终端正文不该被长按选中：否则手机上会弹「复制/全选」菜单挡住命令输入 */
+#tvScr,.tv-chips,.tv-head,.tv-panel{
+  -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+}
+/* 命令输入框必须可以选中和粘贴，只它例外 */
+#tvIn,#tvEditArea{-webkit-user-select:text;-moz-user-select:text;user-select:text;-webkit-touch-callout:default}
+#tvIn{font-size:16px}  /* iOS 上小于 16px 会触发自动放大页面 */
+.tv-inrow{position:relative}
+@media(max-width:420px){
+  .tv-btn{padding:7px 10px;font-size:13px}
+  .tv-mini{padding:7px 11px;font-size:13px}
+  #termView .tv-inrow{gap:6px}
+}
+@media(max-height:560px){
+  .tv-scr{font-size:12px;line-height:1.55}
+  .tv-pad{padding:6px 8px}
+}
+
 </head>
 <body>
 <div class="topbar"><span class="dot"></span><span>云计算模拟考场 · 虚拟 Linux 服务器 + 竞赛仿真场 + 7 套全真卷 · 零依赖 · 断网可用</span></div>
@@ -201,7 +225,7 @@ padding:3px 10px;font-size:11.5px;cursor:pointer;font-family:inherit;white-space
   <p>一个页面装下全部：<b>浏览器里开一台 Linux 服务器</b>（真敲命令、真装服务、真自动评分）、
   <b>5 场竞赛仿真场</b>（含世赛里昂 2024 的 52 个官方评分点）、<b>4 套限时模拟赛</b>、<b>7 套全真模拟卷</b>。
   不用装软件、不用开云账号、<b>断网照考</b>。</p>
-  <div class="badges"><span id="bd-engine">22 个实训场景</span><span id="bd-comp">5 场竞赛仿真</span>
+  <div class="badges"><span>零基础可用</span><span id="bd-engine">22 个实训场景</span><span id="bd-comp">5 场竞赛仿真</span>
   <span id="bd-paper">7 套全真卷</span><span>自动评分</span><span>进度存本机</span></div>
 </header>
 
@@ -213,10 +237,24 @@ padding:3px 10px;font-size:11.5px;cursor:pointer;font-family:inherit;white-space
   <b>手上有 OpenStack / K8s 真集群</b> → 去 <code>sim/index.html</code> 打 7 套全真卷，对真机自评；
   <b>两者结合</b> = 先在虚拟考场把动作练熟，再上真机验收，效率最高。</div>
 
-  <button class="cta" id="goComp">🏟 竞赛仿真场 —— 5 场真实赛事，官方评分点自动判分</button>
-  <button class="cta gold" id="goExam">⏱ 限时模拟赛 —— 4 套，倒计时 / 交卷 / 出报告</button>
-  <button class="cta blue" id="goLab">🧪 虚拟考场 —— 22 个场景，不限时练到会</button>
-  <button class="cta ghost" id="goPapers">📋 全真卷中心 —— 7 套真题，逐条自评打勾</button>
+  <!-- ===== 第一次来的照这个顺序 ===== -->
+  <div class="card" style="border:2px solid #9e2b25;background:#fff8f4">
+    <p><b>👋 第一次来？照这个顺序点，四步就够了</b>（每个按钮都是上面的入口）</p>
+    <ol style="padding-left:22px;margin:8px 0 0">
+      <li><b>先随便玩</b> → 点 <b>🧪 虚拟考场</b>。不用准备什么，它就是一台 Linux 服务器。<br>
+        <span class="small">进来先敲 <code>whoami</code>、<code>ip a</code>、<code>ls</code> 感受一下；每个场景都有「📋 任务」看题、「▶ 示范」看解法。</span></li>
+      <li><b>知道要考什么</b> → 往下滑看 <b>📋 全真卷中心</b>的 7 套真题，了解模块和分值怎么分的。<br>
+        <span class="small">不用现在勾——等你以后有真机了再回来逐条验收。</span></li>
+      <li><b>练比赛节奏</b> → 点 <b>⏱ 限时模拟赛</b>，从「迷你 30 分钟」开始，体验倒计时和交卷判分。</li>
+      <li><b>冲分</b> → 点 <b>🏟 竞赛仿真场</b>。这里有世赛里昂 2024 的 52 个官方评分点，能自动判对错。</li>
+    </ol>
+    <p class="small" style="margin-top:10px"><b>⏱ 大概多久有手感：</b>第一天就能敲命令（虚拟考场随便玩），一周能看懂题目在问什么，一个月能独立做完限时赛。</p>
+  </div>
+
+  <button class="cta blue" id="goLab">① 🧪 先玩一下 —— 虚拟考场（22 场景，自动评分，不需要任何准备）</button>
+  <button class="cta ghost" id="goPapers">② 📋 看看考什么 —— 全真卷中心（7 套真题 331 条检查项）</button>
+  <button class="cta gold" id="goExam">③ ⏱ 练节奏 —— 限时模拟赛（4 套，倒计时/交卷/出报告）</button>
+  <button class="cta" id="goComp">④ 🏟 冲分 —— 竞赛仿真场（5 场赛事，52 个官方评分点自动判分）</button>
 
   <h2 class="sec">虚拟考场是什么</h2>
   <div class="card">
@@ -6827,7 +6865,13 @@ function renderComp(){
 /* ---------- 成绩报告 ---------- */
 function renderReport(){
   var cid=S.comp, vm=getVM(cid), rep=E.compGrade(vm,cid);
-  var h='<div class="qz-item"><h4>📊 '+esc(rep.comp.name)+' · 成绩报告</h4>'+
+  /* 报告页会整体替换 labBody，必须自带返回入口，否则用户点完报告就回不去了 */
+  var h='<div class="qz-item" style="display:flex;gap:8px;align-items:center">'+
+    '<button class="chip" id="lvBackReport">← 返回考场</button>'+
+    '<button class="chip" id="lvGoP1">📋 题书</button>'+
+    '<button class="chip" id="lvGoT1">⏱ '+(LS('kc.comp.left.'+cid,null)!=null?'暂停计时':'开始计时')+'</button>'+
+    '</div>'+
+    '<div class="qz-item"><h4>📊 '+esc(rep.comp.name)+' · 成绩报告</h4>'+
     '<div class="bigscore">'+rep.total+'<span>/'+rep.full+'</span></div>'+
     '<p class="lab-sub">原始得分率 '+rep.pct+'% · 按模块权重折算 <b>'+rep.weighted+' / 100</b></p></div>';
   h+='<div class="qz-item"><h4>模块分布</h4><div class="bars">';
@@ -6922,6 +6966,25 @@ function bind(){
 function bindReportBack(){
   var b=$('lvBackReport');
   if(b) b.addEventListener('click',function(){ paint(); });
+  var p1=$('lvGoP1');
+  if(p1) p1.addEventListener('click',function(){
+    var vm=getVM(S.comp); toast('题书在 /root/TASKBOOK.md（cat 查看）');
+  });
+  var t1=$('lvGoT1');
+  if(t1) t1.addEventListener('click',function(){
+    /* 报告页内开关计时：就地重渲染报告，不跳走 */
+    if(LS('kc.comp.left.'+S.comp,null)==null){
+      var c=E.competitionById(S.comp);
+      var mins=Math.round(c.totalMin/Math.max(1,c.modules.length));
+      LSset('kc.comp.left.'+S.comp, mins*60);
+      startTimer();
+    }else{
+      LSset('kc.comp.left.'+S.comp, null);
+      stopTimer();
+    }
+    $('labBody').innerHTML=renderReport();
+    bindReportBack();
+  });
 }
 
 /* ---------- 计时器 ---------- */

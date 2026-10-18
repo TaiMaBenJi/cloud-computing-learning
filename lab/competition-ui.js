@@ -128,7 +128,13 @@ function renderComp(){
 /* ---------- 成绩报告 ---------- */
 function renderReport(){
   var cid=S.comp, vm=getVM(cid), rep=E.compGrade(vm,cid);
-  var h='<div class="qz-item"><h4>📊 '+esc(rep.comp.name)+' · 成绩报告</h4>'+
+  /* 报告页会整体替换 labBody，必须自带返回入口，否则用户点完报告就回不去了 */
+  var h='<div class="qz-item" style="display:flex;gap:8px;align-items:center">'+
+    '<button class="chip" id="lvBackReport">← 返回考场</button>'+
+    '<button class="chip" id="lvGoP1">📋 题书</button>'+
+    '<button class="chip" id="lvGoT1">⏱ '+(LS('kc.comp.left.'+cid,null)!=null?'暂停计时':'开始计时')+'</button>'+
+    '</div>'+
+    '<div class="qz-item"><h4>📊 '+esc(rep.comp.name)+' · 成绩报告</h4>'+
     '<div class="bigscore">'+rep.total+'<span>/'+rep.full+'</span></div>'+
     '<p class="lab-sub">原始得分率 '+rep.pct+'% · 按模块权重折算 <b>'+rep.weighted+' / 100</b></p></div>';
   h+='<div class="qz-item"><h4>模块分布</h4><div class="bars">';
@@ -223,6 +229,25 @@ function bind(){
 function bindReportBack(){
   var b=$('lvBackReport');
   if(b) b.addEventListener('click',function(){ paint(); });
+  var p1=$('lvGoP1');
+  if(p1) p1.addEventListener('click',function(){
+    var vm=getVM(S.comp); toast('题书在 /root/TASKBOOK.md（cat 查看）');
+  });
+  var t1=$('lvGoT1');
+  if(t1) t1.addEventListener('click',function(){
+    /* 报告页内开关计时：就地重渲染报告，不跳走 */
+    if(LS('kc.comp.left.'+S.comp,null)==null){
+      var c=E.competitionById(S.comp);
+      var mins=Math.round(c.totalMin/Math.max(1,c.modules.length));
+      LSset('kc.comp.left.'+S.comp, mins*60);
+      startTimer();
+    }else{
+      LSset('kc.comp.left.'+S.comp, null);
+      stopTimer();
+    }
+    $('labBody').innerHTML=renderReport();
+    bindReportBack();
+  });
 }
 
 /* ---------- 计时器 ---------- */
