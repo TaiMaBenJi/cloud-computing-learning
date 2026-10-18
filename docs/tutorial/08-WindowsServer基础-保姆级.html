@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 8 章 · Windows Server 基础（另一半世界） - 知识公社</title>
+<meta name="description" content="第 8 章 · Windows Server 基础（另一半世界）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-8-章-windows-server-基础-另一半世界">第 8 章 · Windows Server 基础（另一半世界）</h1>
+<blockquote>云是混合的：Linux 管一半，Windows 管另一半。企业的"域环境"（AD）几乎全是 Windows。</blockquote>
+<blockquote>世界赛 Module B（Windows 模块）8 台主机的考点：AD 域、DNS、组策略、文件共享、IIS、证书服务——本章带你全部过一遍。</blockquote>
+<blockquote>预计学习时间：2-3 周。</blockquote>
+<hr>
+<h2 id="8-1-先搞清楚-windows-server-到底是什么-为什么要学">8.1 先搞清楚：Windows Server 到底是什么、为什么要学</h2>
+<h3 id="它和-windows-10-11-的区别">它和 Windows 10/11 的区别</h3>
+<ul>
+<li>界面长得差不多，但<strong>用途完全不同</strong>：Server 版专门给企业"当服务器"用（没有小娜、没有应用商店）</li>
+<li>核心特色能力：<strong>域（Domain）</strong>——上千台电脑统一管理；文件服务器；IIS 网站；证书服务……</li>
+</ul>
+<h3 id="什么是-域-ad-为什么企业离不开它">什么是"域"（AD）？为什么企业离不开它</h3>
+<p>你有 500 名员工的电脑要管理：每个人有自己的账号密码、每台电脑的权限策略、共享文件夹谁能看……</p>
+<ul>
+<li><strong>没有域</strong>：500 台电脑各自管理账号（崩溃）</li>
+<li><strong>有域</strong>：一台"域控制器"（DC）统一管所有账号和策略。员工在任何一台加域的电脑上都能用同一个账号登录。</li>
+</ul>
+<blockquote>比喻：域 = 公司的大人事系统+大门口禁系统。域控制器 = 人事部。员工账号 = 工牌。组策略 = 公司规章制度（自动下发到每台电脑）。</blockquote>
+<p><strong>世界赛 Module B 的比赛环境</strong>：一堆 Windows Server VM（DC1、DC2、文件服务器、Web 服务器、路由器…），要求你从零搭出一整套域环境并配置各种策略。<strong>本章就是那个比赛的入门训练。</strong></p>
+<hr>
+<h2 id="8-2-准备实验环境">8.2 准备实验环境</h2>
+<h3 id="8-2-1-下载与安装">8.2.1 下载与安装</h3>
+<ol>
+<li>搜索 <strong>"Windows Server 2022 评估版"</strong>（微软官网提供 180 天免费评估版 ISO）</li>
+<li>VMware 里新建虚拟机（和装 Ubuntu 一样，过程见第 1 章）：</li>
+</ol>
+<ul>
+<li>内存建议 <strong>4GB</strong>（域控吃内存）</li>
+<li>磁盘 <strong>60GB</strong></li>
+<li>网络：NAT（够用；要多机互联就桥接）</li>
+</ul>
+<ol>
+<li>安装时选 <strong>Desktop Experience</strong>（带图形界面，方便学习；生产上一般用 Core 无界面版）</li>
+</ol>
+<h3 id="8-2-2-装完后先做三件事">8.2.2 装完后先做三件事</h3>
+<ol>
+<li><strong>改计算机名</strong>（域环境里名字很重要）：</li>
+</ol>
+<ul>
+<li>服务器管理器 → 本地服务器 → 计算机名 → 更改 → 改成 <code>DC1</code>（约定俗成的域控名）→ 重启</li>
+</ul>
+<ol>
+<li><strong>配静态 IP</strong>（域控必须固定 IP！）：</li>
+</ol>
+<ul>
+<li>设置 → 网络 → 适配器选项 → IPv4 → 手动：</li>
+<li>IP: <code>192.168.10.10</code>，掩码 <code>255.255.255.0</code>，网关留空或路由器，<strong>DNS 先设成 127.0.0.1</strong>（自己）</li>
+</ul>
+<ol>
+<li><strong>关掉 IE 增强安全配置</strong>（不然测试网页到处拦）：</li>
+</ol>
+<ul>
+<li>服务器管理器 → 本地服务器 → IE ESC → 都关掉（学习环境）</li>
+</ul>
+<h3 id="8-2-3-认识-powershell-windows-的命令行">8.2.3 认识 PowerShell（Windows 的命令行）</h3>
+<p>开始菜单搜索 <code>PowerShell</code>（蓝色图标），右键"以管理员身份运行"。这就是 Windows 版的"终端"。</p>
+<p><strong>基础命令对照（学 Linux 的人秒懂）</strong>：</p>
+<div class="tw"><table><thead><tr><th>干什么</th><th>Linux</th><th>PowerShell</th></tr></thead><tbody>
+<tr><td>看当前目录</td><td><code>pwd</code></td><td><code>Get-Location</code>（简写 <code>pwd</code> 也行）</td></tr>
+<tr><td>列目录</td><td><code>ls</code></td><td><code>Get-ChildItem</code>（简写 <code>ls</code>/<code>dir</code>）</td></tr>
+<tr><td>切换目录</td><td><code>cd /etc</code></td><td><code>Set-Location C:\</code> （简写 <code>cd</code>）</td></tr>
+<tr><td>看文件内容</td><td><code>cat f</code></td><td><code>Get-Content f</code>（<code>cat</code> 也行）</td></tr>
+<tr><td>建目录</td><td><code>mkdir</code></td><td><code>New-Item -ItemType Directory -Name test</code></td></tr>
+<tr><td>删文件</td><td><code>rm f</code></td><td><code>Remove-Item f</code></td></tr>
+<tr><td>查进程</td><td><code>ps aux</code></td><td><code>Get-Process</code></td></tr>
+<tr><td>查服务</td><td><code>systemctl status x</code></td><td><code>Get-Service x</code></td></tr>
+<tr><td>找命令</td><td><code>which</code></td><td><code>Get-Command</code></td></tr>
+</tbody></table></div>
+<p><strong>PowerShell 的心法</strong>：动词-名词（Verb-Noun）。<code>Get-</code> 是拿、<code>Set-</code> 是设、<code>New-</code> 是新建、<code>Remove-</code> 是删。看懂模式，命令不用背。</p>
+<p><strong>实战几个：</strong></p>
+<pre><code>Get-ComputerInfo | Select-Object CsName, WindowsVersion   # 看系统信息
+Get-Service | Where-Object {$_.Status -eq &quot;Running&quot;} | Select-Object -First 10   # 运行中的服务
+ipconfig /all                                              # 看网络配置（老命令依然好使）</code></pre>
+<p><strong>管道 <code>|</code> 在 PowerShell 里更强大</strong>（对象级处理），和 Linux 一个思路。</p>
+<hr>
+<h2 id="8-3-核心实战-1-搭建域控制器-ad-ds">8.3 核心实战 1：搭建域控制器（AD DS）</h2>
+<h3 id="8-3-1-安装-ad-ds-角色">8.3.1 安装 AD DS 角色</h3>
+<p>图形方式（学习期先用图形，熟了再上 PowerShell）：</p>
+<ol>
+<li>服务器管理器 → <strong>添加角色和功能</strong></li>
+<li>一路下一页 → 勾选 <strong>"Active Directory 域服务"</strong>（弹出的依赖项全部添加）</li>
+<li>装完后点击旗子图标的通知 → <strong>"将此服务器提升为域控制器"</strong></li>
+</ol>
+<h3 id="8-3-2-提升为域控">8.3.2 提升为域控</h3>
+<ol>
+<li>选择 <strong>"添加新林"</strong>（全新域名）</li>
+<li>根域名：<code>mycompany.local</code>（练习用 <code>.local</code>；真实公司用自己的域名）</li>
+<li>功能级别默认，勾选 <strong>DNS 服务器</strong>（一起装）</li>
+<li>DSRM 密码：设一个记得住的（比如 <code>P@ssw0rd123</code>）</li>
+<li>一路下一步 → 安装 → 自动重启</li>
+</ol>
+<p><strong>重启后用域管理员登录</strong>：用户名 <code>MYCOMPANY\Administrator</code>（或 <code>Administrator@mycompany.local</code>）</p>
+<p><strong>验证</strong>：</p>
+<pre><code>Get-ADDomain                 # 显示域信息（默认需要 RSAT 工具，域控上自带）
+Get-ADDomainController       # 看域控状态</code></pre>
+<p>或在"管理工具"里打开 <strong>Active Directory 用户和计算机</strong>——这就是"人事部管理系统"的界面。</p>
+<h3 id="8-3-3-建组织架构-ou-用户-组-module-b-评分点同款">8.3.3 建组织架构（OU / 用户 / 组）——Module B 评分点同款</h3>
+<p><strong>先建 OU（组织单位 = 文件夹式的部门结构）</strong>： 图形：AD 用户和计算机 → 右键域名 → 新建 → 组织单位 → 建 <code>Employees</code>、<code>Servers</code>、<code>Groups</code> 三个 OU。</p>
+<p><strong>PowerShell 方式（更帅气，也是评分脚本检查的方式）</strong>：</p>
+<pre><code>New-ADOrganizationalUnit -Name &quot;Employees&quot; -Path &quot;DC=mycompany,DC=local&quot;
+New-ADOrganizationalUnit -Name &quot;Servers&quot;   -Path &quot;DC=mycompany,DC=local&quot;
+New-ADOrganizationalUnit -Name &quot;Groups&quot;    -Path &quot;DC=mycompany,DC=local&quot;</code></pre>
+<p><strong>建用户和组</strong>：</p>
+<pre><code># 建用户（-Enabled $true 直接启用）
+New-ADUser -Name &quot;张三&quot; -SamAccountName &quot;zhangsan&quot; -UserPrincipalName &quot;zhangsan@mycompany.local&quot; `
+  -Path &quot;OU=Employees,DC=mycompany,DC=local&quot; -AccountPassword (ConvertTo-SecureString &quot;Abc12345!&quot; -AsPlainText -Force) -Enabled $true
+
+# 建组
+New-ADGroup -Name &quot;IT-Team&quot; -GroupScope Global -Path &quot;OU=Groups,DC=mycompany,DC=local&quot;
+
+# 把张三加入组
+Add-ADGroupMember -Identity &quot;IT-Team&quot; -Members &quot;zhangsan&quot;
+
+# 查询验证
+Get-ADUser -Filter * | Select-Object Name, SamAccountName
+Get-ADGroupMember -Identity &quot;IT-Team&quot;</code></pre>
+<p>（注意 PowerShell 里反引号 `<code> </code> `` 是"命令太长换行"。这是从别人脚本里抄命令时最常见的坑。）</p>
+<p><strong>批量建 20 个用户（自动化思维，Module B 有"用脚本创建用户"的评分点）</strong>：</p>
+<pre><code>1..20 | ForEach-Object {
+    $name = &quot;remote$_&quot;
+    New-ADUser -Name $name -SamAccountName $name `
+      -UserPrincipalName &quot;$name@mycompany.local&quot; `
+      -Path &quot;OU=Employees,DC=mycompany,DC=local&quot; `
+      -AccountPassword (ConvertTo-SecureString &quot;Abc12345!&quot; -AsPlainText -Force) -Enabled $true
+}
+Get-ADUser -Filter &quot;Name -like &#x27;remote*&#x27;&quot; | Measure-Object   # 数一数 → Count: 20</code></pre>
+<h3 id="8-3-4-加域-让另一台机器-入伙">8.3.4 加域：让另一台机器"入伙"</h3>
+<p>在<strong>另一台</strong> Windows Server（比如 FILE-SRV）上：</p>
+<ol>
+<li>先设 DNS：<strong>指向域控 IP</strong>（192.168.10.10）——<strong>这是加域失败的第一大坑：DNS 没指对连域名都解析不了</strong></li>
+<li>计算机名改成 <code>FILE-SRV</code> → 重启</li>
+<li>设置 → 系统 → 高级系统设置 → 计算机名 → 更改 → 选择"域" → 填 <code>mycompany.local</code> → 输入域管理员账号密码 → 成功后重启</li>
+<li>重启后用域账号登录：<code>MYCOMPANY\zhangsan</code> 或 <code>zhangsan@mycompany.local</code></li>
+</ol>
+<p><strong>验证加域成功</strong>：</p>
+<pre><code>whoami        # → mycompany\zhangsan 形式
+systeminfo | findstr /i domain</code></pre>
+<hr>
+<h2 id="8-4-核心实战-2-windows-上的-dns-服务器">8.4 核心实战 2：Windows 上的 DNS 服务器</h2>
+<p>域控装 AD 时已经自带 DNS。验证与操作（Module B 的 NW-SRV 考点是"从区传输"）：</p>
+<ol>
+<li>管理工具 → <strong>DNS</strong></li>
+<li>展开：正向查找区域 → <code>mycompany.local</code> ——能看到域控自动生成的记录（域控自己、_msdcs 等）</li>
+<li><strong>手动建记录</strong>（右键区域 → 新建主机 A 记录）：</li>
+</ol>
+<ul>
+<li><code>www</code> → <code>192.168.10.20</code></li>
+<li><code>mail</code> → <code>192.168.10.21</code></li>
+</ul>
+<ol>
+<li><strong>反向查找区域</strong>：右键"反向查找区域" → 新建 → 网络 ID 填 <code>192.168.10</code> → 完成</li>
+<li>验证：<code>nslookup www.mycompany.local 192.168.10.10</code></li>
+</ol>
+<p><strong>辅助区域（从区传输）实验</strong>（评分点技能）：</p>
+<ul>
+<li>在第二台服务器（装 DNS 角色）上：右键 → 新建区域 → <strong>辅助区域</strong> → 名称 <code>mycompany.local</code> → 主服务器填 <code>192.168.10.10</code></li>
+<li>成功同步后能看到和主一样的记录。<strong>这就是"主从复制"的 Windows 版。</strong></li>
+</ul>
+<hr>
+<h2 id="8-5-核心实战-3-文件共享与-dfs">8.5 核心实战 3：文件共享与 DFS</h2>
+<h3 id="8-5-1-基础共享-file-srv-上">8.5.1 基础共享（FILE-SRV 上）</h3>
+<pre><code># 建文件夹结构
+New-Item -ItemType Directory -Path C:\Shares\Public -Force
+New-Item -ItemType Directory -Path C:\Shares\IT -Force
+
+# 建共享并给权限（SMB 共享）
+New-SmbShare -Name &quot;Public&quot; -Path &quot;C:\Shares\Public&quot; -FullAccess &quot;Everyone&quot;
+New-SmbShare -Name &quot;IT&quot; -Path &quot;C:\Shares\IT&quot; -ChangeAccess &quot;MYCOMPANY\IT-Team&quot; -ReadAccess &quot;Everyone&quot;
+
+# 查看
+Get-SmbShare</code></pre>
+<p>访问测试：<code>\\192.168.10.20</code> 或 <code>\\file-srv.mycompany.local</code></p>
+<h3 id="8-5-2-权限的-双门规则-超重要-module-b-重灾区">8.5.2 权限的"双门规则"（<strong>超重要，Module B 重灾区</strong>）</h3>
+<p>Windows 文件访问要过<strong>两道门</strong>：</p>
+<ol>
+<li><strong>共享权限（Share）</strong>——网络门</li>
+<li><strong>NTFS 权限</strong>——文件夹自己的门</li>
+<p><strong>两道门都通过才放行</strong>（取最严格的那个）。</p>
+</ol>
+<blockquote>比喻：进公司大楼要过大门（共享权限），进财务室要再过一道门（NTFS）。哪道门不开都进不去。</blockquote>
+<pre><code># 设 NTFS 权限（以 IT 文件夹为例）
+icacls &quot;C:\Shares\IT&quot; /grant &quot;MYCOMPANY\IT-Team:(OI)(CI)M&quot;   # 修改权限
+icacls &quot;C:\Shares\IT&quot; /grant &quot;Everyone:(OI)(CI)R&quot;             # 只读
+# (OI)=对象继承 (CI)=容器继承 M=修改 R=读</code></pre>
+<p>Module B 评分点里"公共共享匿名可读/可写""内部共享需认证"考的就是这两道门的组合。</p>
+<h3 id="8-5-3-dfs-分布式文件系统">8.5.3 DFS（分布式文件系统）</h3>
+<p>一块共享不够用？DFS 把多个共享"拼"成一棵逻辑树，比如 <code>\\paris.local\CSDrive\MKT|SALES|HR</code> 分别指向不同服务器文件夹。</p>
+<ol>
+<li>服务器管理器 → 添加角色 → <strong>文件服务器</strong> + <strong>DFS 复制</strong>（或 PowerShell：<code>Install-WindowsFeature FS-DFS-Namespace, FS-DFS-Replication</code>）</li>
+<li>新建<strong>命名空间</strong>（如 <code>CSDrive</code>）→ 里面建<strong>文件夹</strong>（MKT、SALES…）→ 各自指向目标共享</li>
+<li>用户只记一个入口 <code>\\mycompany.local\CSDrive</code>，底下按部门导航</li>
+</ol>
+<p><strong>DFS 复制</strong>：两个服务器上的文件夹互相同步（改一边，另一边自动更新）——Module B 有"File Replication"评分点。</p>
+<hr>
+<h2 id="8-6-核心实战-4-组策略-gpo-module-b-评分点最密集处">8.6 核心实战 4：组策略（GPO）——Module B 评分点最密集处</h2>
+<p><strong>组策略 = 批量下发的"规章制度"</strong>。你在域控上写一条策略，全公司电脑/用户生效。</p>
+<h3 id="8-6-1-入门三连">8.6.1 入门三连</h3>
+<ol>
+<li>打开 <strong>组策略管理</strong>（管理工具里）</li>
+<li>找到 <code>mycompany.local</code> → 右键 <strong>Default Domain Policy</strong> → 编辑（或右键 OU 新建 GPO 再链接）</li>
+<li>找到设置项 → 启用/配置 → 保存（自动生效，客户端重启或 <code>gpupdate /force</code> 后应用）</li>
+</ol>
+<h3 id="8-6-2-六个-世赛同款-策略实战-对照-module-b-评分点">8.6.2 六个"世赛同款"策略实战（对照 Module B 评分点）</h3>
+<p><strong>① 登录消息横幅</strong>（用户登录时显示警告文字） 路径：计算机配置 → 策略 → Windows 设置 → 安全设置 → 本地策略 → 安全选项 → "交互式登录：试图登录的用户的消息标题" + "消息文本"</p>
+<p><strong>② 禁用本地 Administrator 账户</strong> 同路径 → "账户：管理员账户状态" → 已禁用</p>
+<p><strong>③ 禁止存储 LM 哈希</strong>（安全加固） 同路径 → "网络安全：不要在下次更改密码时存储 LAN Manager 的哈希值" → 已启用</p>
+<p><strong>④ 统一环境变量</strong>（评分点里那个奇怪的 TheErasTour=2024 就是这种题） 用户配置 → 首选项 → Windows 设置 → 环境 → 新建</p>
+<p><strong>⑤ 禁用注册表编辑器 &amp; 命令提示符</strong>（限制普通用户乱搞） 用户配置 → 管理模板 → 系统 → "阻止访问注册表编辑工具"、"阻止访问命令提示符"——<strong>注意：只对某几个部门限制？</strong> 那就要用<strong>安全筛选</strong>（GPO 属性 → 安全筛选 → 加上 SALES 组，去掉 Authenticated Users）——这就是 Module B 里"Users in SALES, MKT and HR..."那条的考法。</p>
+<p><strong>⑥ 登录自动运行脚本</strong> 用户配置 → Windows 设置 → 脚本 → 登录 → 添加脚本</p>
+<h3 id="8-6-3-验证与排错-比赛检查也这么看">8.6.3 验证与排错（比赛检查也这么看）</h3>
+<pre><code># 客户端上：
+gpupdate /force                # 强制刷新策略
+gpresult /r                    # 看当前用户/计算机应用了哪些策略 ★ 最常用
+gpresult /h report.html        # 生成详细报告（浏览器打开看）</code></pre>
+<p><strong>"策略不生效"排查三连</strong>：① 用户/电脑在策略链接的 OU 里吗？② <code>gpupdate</code> 刷新了吗？③ 安全筛选/继承设置对吗？（还有：DNS 不通时策略根本下发不了——回看 8.3.4 的坑。）</p>
+<hr>
+<h2 id="8-7-核心实战-5-iis-网站-证书">8.7 核心实战 5：IIS 网站 + 证书</h2>
+<pre><code># 装 IIS
+Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+# 默认网站起来了吗？
+Invoke-WebRequest http://localhost -UseBasicParsing | Select-Object StatusCode</code></pre>
+<p><strong>建一个新站点</strong>（Module B 的 WEB-SRV 是在 IIS 上建虚拟主机 + HTTPS 无错误）：</p>
+<ol>
+<li><strong>IIS 管理器</strong> → 右键"网站" → 添加网站：</li>
+</ol>
+<ul>
+<li>名称：<code>mycompany</code></li>
+<li>物理路径：<code>C:\inetpub\mycompany</code>（先建好文件夹放个 index.html）</li>
+<li>绑定：<code>http</code>，主机名 <code>www.mycompany.local</code>，端口 80</li>
+</ul>
+<ol>
+<li><strong>本地 hosts 或 DNS</strong> 把 <code>www.mycompany.local</code> 指到这台机器</li>
+<li>浏览器访问 <code>http://www.mycompany.local</code> → 出现你的页面</li>
+</ol>
+<p><strong>配 HTTPS（AD CS 签发 + IIS 绑定）</strong>：</p>
+<ol>
+<li>域控上装 <strong>AD CS</strong>（服务器管理器 → 添加角色 → Active Directory 证书服务 → 勾选"证书颁发机构"）</li>
+<li>Web 服务器上：IIS → 服务器证书 → <strong>创建域证书</strong> → 填信息 → 颁发机构选 <code>mycompany-DC1-CA</code></li>
+<li>网站 → 绑定 → 添加 → https → 选刚才的证书</li>
+<li>浏览器访问 <code>https://www.mycompany.local</code> → <strong>取决于信任</strong>（域内机器已信任自己的 CA，直接绿锁）</li>
+</ol>
+<hr>
+<h2 id="8-8-powershell-自动化速成-加分项">8.8 PowerShell 自动化速成（加分项）</h2>
+<p>把上面的操作脚本化——<strong>Module B 评分点"用自动脚本创建用户"就是这个</strong>：</p>
+<pre><code># 例子：一键检查本机是否满足域成员条件
+$dns = (Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object {$_.ServerAddresses}).ServerAddresses
+Write-Host &quot;DNS 服务器: $dns&quot;
+if ($dns -contains &quot;192.168.10.10&quot;) { Write-Host &quot;DNS 正确 ✓&quot; -ForegroundColor Green }
+else { Write-Host &quot;DNS 指向错误！加域会失败&quot; -ForegroundColor Red }</code></pre>
+<p><strong>建议</strong>：把本章所有图形操作，自己用 PowerShell 再实现一遍。<strong>这就是从"会用"到"熟练"的分水岭。</strong></p>
+<hr>
+<h2 id="8-9-练习与自我检验">8.9 练习与自我检验</h2>
+<h3 id="练习-能全做出来-module-b-你就入门了">练习（能全做出来，Module B 你就入门了）</h3>
+<ol>
+<li>装一台 Windows Server，改名为 DC1，建域 <code>mycompany.local</code></li>
+<li>建 OU：Employees / Servers / Groups；建用户 zhangsan/李四；建组 IT-Team 并加人</li>
+<li>第二台机器设好 DNS、改名 FILE-SRV、加域</li>
+<li>在 FILE-SRV 上建共享 <code>Public</code>（全员读写）和 <code>IT</code>（仅 IT-Team 可改）</li>
+<li>配置 3 条 GPO：登录横幅、禁 cmd、统一环境变量</li>
+<li>用 <code>gpresult /r</code> 验证 GPO 生效</li>
+<li>（进阶）配 DFS 命名空间，把两个共享挂进一棵树</li>
+<li>（进阶）装 AD CS，给 IIS 网站配 HTTPS</li>
+</ol>
+<h3 id="自检清单">自检清单</h3>
+<ul>
+<li>[ ] 我能解释域/域控/OU/加域的完整流程</li>
+<li>[ ] 我会用 PowerShell 建 OU/用户/组（不只用图形界面）</li>
+<li>[ ] 我踩过"加域失败"的坑并能说出至少 3 个原因（DNS 没指对、时间不同步、凭据错误…）</li>
+<li>[ ] 我理解"共享权限 + NTFS 权限"双门规则</li>
+<li>[ ] 我会配 GPO 并用 gpresult 验证</li>
+<li>[ ] 我给 IIS 配过 HTTPS</li>
+</ul>
+<h3 id="对应真题">对应真题</h3>
+<ul>
+<li>世界赛 Module B：DC1/DC2（域、子域、批量用户、细粒度密码策略）、FILE-SRV（DFS/配额/可执行文件限制）、NW-SRV（从区传输）、WEB-SRV（CA/IIS/HTTPS）、ROUTER（RRAS/VPN/DHCP）——本章覆盖其 80%，剩下 20%（RRAS 路由、站点间 VPN、DHCP 服务器）建议对照 <code>test-projects/LYON2024-ModuleB-评分脚本/</code> 逐个补齐</li>
+</ul>
+</div>
+</body>
+</html>

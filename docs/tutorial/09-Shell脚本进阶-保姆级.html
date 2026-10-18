@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 9 章 · Shell 脚本进阶（把重复劳动交给电脑） - 知识公社</title>
+<meta name="description" content="第 9 章 · Shell 脚本进阶（把重复劳动交给电脑）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-9-章-shell-脚本进阶-把重复劳动交给电脑">第 9 章 · Shell 脚本进阶（把重复劳动交给电脑）</h1>
+<blockquote>第 1 章你写过能跑的脚本。本章把脚本能力升到"能写比赛级工具"的水平：参数、函数、错误处理、日志、真实项目。</blockquote>
+<blockquote>比赛中它是你的"外挂"（一键部署脚本）；工作中它是你涨薪的本钱（自动化 = 运维的核心价值）。</blockquote>
+<blockquote>预计学习时间：2-3 周。</blockquote>
+<hr>
+<h2 id="9-1-快速复习-三个新武器">9.1 快速复习 + 三个新武器</h2>
+<h3 id="复习-第-1-章">复习（第 1 章）</h3>
+<pre><code>#!/bin/bash
+NAME=&quot;世界&quot;                      # 变量（等号两边无空格）
+echo &quot;你好 $NAME&quot;                # 使用变量
+if [ -f /etc/passwd ]; then echo &quot;有&quot;; else echo &quot;无&quot;; fi
+for i in 1 2 3; do echo $i; done</code></pre>
+<h3 id="新武器-1-命令替换与算术">新武器 1：命令替换与算术</h3>
+<pre><code>TODAY=$(date +%F)                # 把命令输出存进变量
+COUNT=$(( 3 + 5 * 2 ))           # 算术运算（$((...))）
+echo &quot;$TODAY 结果=$COUNT&quot;        # → 2026-09-16 结果=13</code></pre>
+<h3 id="新武器-2-字符串操作">新武器 2：字符串操作</h3>
+<pre><code>FILE=&quot;backup-2026-09-16.tar.gz&quot;
+echo ${FILE%.tar.gz}             # 去掉后缀 → backup-2026-09-16
+echo ${FILE#backup-}             # 去掉前缀 → 2026-09-16.tar.gz
+echo ${FILE:0:6}                 # 取前6个字符 → backup
+echo ${#FILE}                    # 字符串长度</code></pre>
+<p>（<code>%</code> 删尾、<code>#</code> 删头，单符号删最短、双符号删最长。练三次就记住。）</p>
+<h3 id="新武器-3-真假与状态码">新武器 3：真假与状态码 <code>$?</code></h3>
+<pre><code>ping -c 1 baidu.com &gt; /dev/null
+echo $?          # 上一条命令的&quot;退出码&quot;：0 = 成功，非 0 = 失败</code></pre>
+<p><strong><code>$?</code> 是脚本世界的"判决书"。</strong> 每个命令执行完都留下一个：0 代表成功，其他数字代表各种失败。</p>
+<hr>
+<h2 id="9-2-函数-把常用操作打包">9.2 函数：把常用操作打包</h2>
+<pre><code>#!/bin/bash
+
+# 定义函数（两种写法等价）
+log() {
+    echo &quot;[$(date +%F&#x27; &#x27;%T)] $*&quot;
+}
+
+check_service() {
+    local name=&quot;$1&quot;                 # local = 只在这个函数里有效的变量
+    if systemctl is-active --quiet &quot;$name&quot;; then
+        log &quot;服务 $name: 正常 ✓&quot;
+        return 0
+    else
+        log &quot;服务 $name: 挂了 ✗&quot;
+        return 1
+    fi
+}
+
+# 使用函数
+log &quot;开始巡检&quot;
+check_service nginx
+check_service mysql
+check_service ssh</code></pre>
+<p>要点：</p>
+<ul>
+<li><code>$1</code> = 第一个参数，<code>$2</code> 第二个…… <code>$*</code> = 所有参数</li>
+<li><code>local</code> 声明局部变量（好习惯，避免污染全局）</li>
+<li><code>return 0/1</code> = 函数的"退出码"，调用处可以用 <code>if check_service nginx; then ...</code></li>
+</ul>
+<p><strong>这个脚本已经能当"服务巡检器"用了。</strong></p>
+<hr>
+<h2 id="9-3-数组与循环进阶">9.3 数组与循环进阶</h2>
+<pre><code>#!/bin/bash
+SERVICES=(nginx mysql ssh cron)          # 数组：括号 + 空格分隔
+
+echo &quot;共 ${#SERVICES[@]} 个服务&quot;          # 元素个数
+for s in &quot;${SERVICES[@]}&quot;; do             # 遍历所有元素（引号+[@] 是标准姿势）
+    echo &quot;检查: $s&quot;
+done
+
+# 数字循环
+for i in {1..5}; do echo &quot;第 $i 次&quot;; done
+for ((i=0; i&lt;5; i++)); do echo &quot;i=$i&quot;; done     # C 风格
+
+# while 循环（常用于&quot;直到...&quot;）
+count=0
+while [ $count -lt 3 ]; do
+    echo &quot;count=$count&quot;
+    count=$((count+1))
+done
+
+# 逐行读文件（经典套路）
+while IFS= read -r line; do
+    echo &quot;读到: $line&quot;
+done &lt; /etc/hosts</code></pre>
+<hr>
+<h2 id="9-4-错误处理-让脚本-摔倒了会喊疼">9.4 错误处理：让脚本"摔倒了会喊疼"</h2>
+<p>默认情况下 bash 脚本很"头铁"：一条命令失败了它还继续往下跑。三种让脚本变聪明的办法：</p>
+<pre><code>#!/bin/bash
+set -e          # ★ 只要有任何命令失败(非零退出)，立即停止整个脚本
+set -u          # ★ 用了未定义的变量就报错（防止 $PAHT 拼错导致的诡异行为）
+set -o pipefail # 管道中任何一个命令失败都算失败
+
+# trap：错误时执行&quot;善后&quot;（比如清理临时文件）
+cleanup() {
+    echo &quot;清理临时文件...&quot;
+    rm -rf /tmp/mytask.$$
+}
+trap cleanup EXIT       # 无论脚本怎么退出，都执行 cleanup</code></pre>
+<p><strong><code>set -euo pipefail</code> 这三连是现代脚本的"安全带"</strong>，抄每一份正经脚本的开头。</p>
+<p><strong>手写检查（set -e 之外的精细控制）：</strong></p>
+<pre><code>if ! mysqldump -u root db &gt; /tmp/backup.sql 2&gt;/dev/null; then
+    echo &quot;备份失败！&quot; &gt;&amp;2      # &gt;&amp;2 = 输出到&quot;错误通道&quot;
+    exit 1
+fi</code></pre>
+<hr>
+<h2 id="9-5-调试-脚本不听话怎么办">9.5 调试：脚本不听话怎么办</h2>
+<pre><code>bash -x myscript.sh        # ★ 逐行打印执行过程（最重要调试手段）
+# 输出里带 + 的是实际执行的命令，对照着看哪一步和你想的不一样
+
+bash -n myscript.sh        # 只检查语法，不执行</code></pre>
+<p><strong>调试心法</strong>：在可疑位置加 <code>echo "DEBUG: 变量X=$X"</code>,一层层缩小范围。</p>
+<hr>
+<h2 id="9-6-文本处理进阶-和脚本配合的黄金搭档">9.6 文本处理进阶（和脚本配合的黄金搭档）</h2>
+<h3 id="awk-进阶三招-会了这仨-处理日志横着走">awk 进阶三招（会了这仨，处理日志横着走）</h3>
+<pre><code># ① 按条件筛选 + 求和
+awk &#x27;$3 &gt; 1000 {sum += $3} END {print &quot;总计:&quot;, sum}&#x27; data.txt
+
+# ② 按列过滤去重计数（分析访问日志的 IP 排行）
+awk &#x27;{print $1}&#x27; /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -10
+
+# ③ 取分隔符字段 + 判断
+awk -F: &#x27;$3 &gt;= 1000 {print $1, $3}&#x27; /etc/passwd</code></pre>
+<p>（<code>sort | uniq -c | sort -rn</code> 是"统计排行榜"的万能连招——先排序、去重计数、再按数量倒排。）</p>
+<h3 id="sed-进阶">sed 进阶</h3>
+<pre><code>sed -n &#x27;10,20p&#x27; file.txt              # 只打印第 10-20 行
+sed &#x27;/^#/d&#x27; config.conf               # 删除所有注释行
+sed &#x27;s/old/new/g; s/foo/bar/g&#x27; f.txt  # 多条替换连写
+sed -i.bak &#x27;s/x/y/g&#x27; f.txt            # 改文件并留一份 .bak 备份（好习惯）</code></pre>
+<h3 id="把这一切串起来的实战-日志分析报告">把这一切串起来的实战：日志分析报告</h3>
+<pre><code>#!/bin/bash
+set -euo pipefail
+LOG=&quot;/var/log/nginx/access.log&quot;
+echo &quot;===== Nginx 日志报告 $(date +%F) =====&quot;
+echo &quot;总请求数: $(wc -l &lt; $LOG)&quot;
+echo &quot;--- TOP 10 访问 IP ---&quot;
+awk &#x27;{print $1}&#x27; &quot;$LOG&quot; | sort | uniq -c | sort -rn | head -10
+echo &quot;--- 状态码分布 ---&quot;
+awk &#x27;{print $9}&#x27; &quot;$LOG&quot; | sort | uniq -c | sort -rn
+echo &quot;--- 最热路径 TOP 5 ---&quot;
+awk &#x27;{print $7}&#x27; &quot;$LOG&quot; | sort | uniq -c | sort -rn | head -5</code></pre>
+<p><strong>这份脚本放上服务器，每天定时跑一次，你就是有"数据能力"的运维了。</strong></p>
+<hr>
+<h2 id="9-7-参数处理-让脚本像正规工具">9.7 参数处理：让脚本像正规工具</h2>
+<pre><code>#!/bin/bash
+# 用法: ./deploy.sh -e prod -v 1.0.0
+set -euo pipefail
+
+ENV=&quot;dev&quot;; VER=&quot;&quot;
+
+while getopts &quot;e:v:h&quot; opt; do
+    case $opt in
+        e) ENV=&quot;$OPTARG&quot; ;;
+        v) VER=&quot;$OPTARG&quot; ;;
+        h) echo &quot;用法: $0 -e 环境 -v 版本&quot;; exit 0 ;;
+        *) echo &quot;未知参数&quot;; exit 1 ;;
+    esac
+done
+
+echo &quot;部署环境: $ENV, 版本: $VER&quot;</code></pre>
+<p>运行 <code>./deploy.sh -e prod -v 1.0.0</code> → "部署环境: prod, 版本: 1.0.0"。 <strong>这就是"带参数的正规命令行工具"的写法</strong>（第 1 章的 rm -f 里的 -f 就是这个机制）。</p>
+<hr>
+<h2 id="9-8-实战脚本-3-连-拿来就能用">9.8 实战脚本 3 连（拿来就能用）</h2>
+<h3 id="9-8-1-系统巡检报告-每天发给自己">9.8.1 系统巡检报告（每天发给自己）</h3>
+<pre><code>#!/bin/bash
+set -euo pipefail
+echo &quot;===== 系统巡检 $(date) =====&quot;
+echo &quot;[CPU] 负载: $(uptime | awk -F&#x27;load average:&#x27; &#x27;{print $2}&#x27;)&quot;
+echo &quot;[内存] $(free -h | awk &#x27;/Mem:/ {print &quot;总:&quot;$2&quot; 已用:&quot;$3&quot; 可用:&quot;$7}&#x27;)&quot;
+echo &quot;[磁盘] $(df -h / | awk &#x27;NR==2 {print &quot;根分区已用 &quot;$5&quot; (&quot;$3&quot;/&quot;$2&quot;)&quot;}&#x27;)&quot;
+echo &quot;[服务]&quot;
+for s in nginx mysql ssh; do
+    systemctl is-active --quiet &quot;$s&quot; &amp;&amp; echo &quot;  $s: OK&quot; || echo &quot;  $s: FAIL&quot;
+done
+echo &quot;[最近的错误日志]&quot;
+journalctl -p err --since &quot;1 hour ago&quot; --no-pager | tail -5 || true</code></pre>
+<p>（<code>|| true</code> = "出错也别让脚本挂"——配合 set -e 的逃生口。）</p>
+<h3 id="9-8-2-批量备份-自动清理-生产级">9.8.2 批量备份 + 自动清理（生产级）</h3>
+<pre><code>#!/bin/bash
+set -euo pipefail
+SRC_DIRS=&quot;/etc /home /var/www&quot;
+DEST=&quot;/backup&quot;
+KEEP_DAYS=7
+STAMP=$(date +%F-%H%M)
+mkdir -p &quot;$DEST&quot;
+
+for dir in $SRC_DIRS; do
+    name=$(basename &quot;$dir&quot;)
+    tar -czf &quot;$DEST/${name}-${STAMP}.tar.gz&quot; &quot;$dir&quot; 2&gt;/dev/null
+    echo &quot;已备份 $dir → ${name}-${STAMP}.tar.gz&quot;
+done
+
+# 清理超过 7 天的旧备份
+find &quot;$DEST&quot; -name &quot;*.tar.gz&quot; -mtime +$KEEP_DAYS -print -delete
+echo &quot;清理完成，当前备份：&quot;
+ls -lh &quot;$DEST&quot; | tail -10</code></pre>
+<h3 id="9-8-3-一键部署脚本-比赛神器">9.8.3 一键部署脚本（比赛神器）</h3>
+<pre><code>#!/bin/bash
+# deploy.sh —— 一键部署静态网站 + 后端服务
+set -euo pipefail
+SITE_NAME=&quot;${1:?用法: $0 站点名}&quot;     # ${1:?提示} = 没传参数就报错退出
+ROOT=&quot;/var/www/$SITE_NAME&quot;
+
+log() { echo -e &quot;\033[32m[$(date +%T)] $*\033[0m&quot;; }   # 绿色日志
+err() { echo -e &quot;\033[31m[错误] $*\033[0m&quot; &gt;&amp;2; }
+
+log &quot;1/4 创建站点目录 $ROOT&quot;
+sudo mkdir -p &quot;$ROOT&quot;
+
+log &quot;2/4 写入首页&quot;
+echo &quot;&lt;h1&gt;$SITE_NAME is running&lt;/h1&gt;&quot; | sudo tee &quot;$ROOT/index.html&quot; &gt; /dev/null
+
+log &quot;3/4 配置 Nginx&quot;
+sudo tee &quot;/etc/nginx/sites-available/$SITE_NAME.conf&quot; &gt; /dev/null &lt;&lt;EOF
+server {
+    listen 80;
+    server_name $SITE_NAME.local;
+    root $ROOT;
+    index index.html;
+}
+EOF
+sudo ln -sf &quot;/etc/nginx/sites-available/$SITE_NAME.conf&quot; /etc/nginx/sites-enabled/
+
+log &quot;4/4 测试并重载&quot;
+sudo nginx -t &amp;&amp; sudo systemctl reload nginx
+log &quot;部署完成！测试: curl -H &#x27;Host: $SITE_NAME.local&#x27; http://localhost&quot;</code></pre>
+<p><strong>跑一遍 <code>./deploy.sh demo</code>——一个命令部署整个网站。</strong> 比赛时把手动步骤都变成这样的脚本，就是韩国选手 <code>make up</code> 一刀流背后的秘密。</p>
+<hr>
+<h2 id="9-9-练习与自我检验">9.9 练习与自我检验</h2>
+<h3 id="练习">练习</h3>
+<ol>
+<li>写一个脚本 <code>check.sh</code>：接受一个服务名参数，输出"该服务运行中/未运行"（用 <code>$?</code> 和 <code>systemctl</code>）</li>
+<li>写一个脚本：统计你系统里所有 <code>.log</code> 文件的总大小</li>
+<li>写一个脚本：把 <code>/etc/passwd</code> 里所有真人用户（UID≥1000）打印成"用户名 (UID)"格式</li>
+<li>给第 3 个脚本加上 <code>set -euo pipefail</code> 和参数处理（-f 指定文件）</li>
+<li>把 9.8.1 的巡检报告配成 crontab，每天早上 8 点输出到 <code>/var/log/daily-check.log</code></li>
+<li>（挑战）写一个"竞速脚本"：随机生成 1000 个文件，然后统计处理耗时</li>
+</ol>
+<p>&lt;details&gt;&lt;summary&gt;练习 2 参考答案&lt;/summary&gt;</p>
+<pre><code>#!/bin/bash
+set -euo pipefail
+total=0
+while IFS= read -r f; do
+    size=$(stat -c%s &quot;$f&quot;)
+    total=$((total + size))
+done &lt; &lt;(find /var/log -name &quot;*.log&quot; 2&gt;/dev/null)
+echo &quot;总大小: $((total / 1024 / 1024)) MB&quot;</code></pre>
+<p>（<code>&lt; &lt;(...)</code> 是"进程替换"，把 find 的输出喂给 while——进阶技巧，见过即可。） &lt;/details&gt;</p>
+<h3 id="自检清单">自检清单</h3>
+<ul>
+<li>[ ] 我会写带参数的函数，理解 <code>return</code>/<code>$?</code>/<code>$1</code></li>
+<li>[ ] 我背得出 <code>set -euo pipefail</code> 并知道每个字母的作用</li>
+<li>[ ] 我用过 <code>bash -x</code> 调试脚本</li>
+<li>[ ] 我会用 <code>sort | uniq -c | sort -rn</code> 做排行榜统计</li>
+<li>[ ] 我写出了 3 个"生产级"脚本（备份/巡检/部署）</li>
+<li>[ ] 我知道 <code>${1:?提示}</code>、<code>|| true</code>、<code>tee</code> 这些实用技巧</li>
+</ul>
+<h3 id="对应真题">对应真题</h3>
+<ul>
+<li>世界赛 Module A：A10-02（备份脚本检查）、A15（Ansible 本质就是"批量脚本"）</li>
+<li>世界赛 Module B：用 PowerShell 脚本批量建用户</li>
+<li>韩国赛：整套 Makefile + 脚本化操作 = 本章能力的工程化形态</li>
+</ul>
+</div>
+</body>
+</html>

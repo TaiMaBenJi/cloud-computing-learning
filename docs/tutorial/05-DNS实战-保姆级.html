@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 5 章 · DNS 与域名体系实战（亲手搭一台&quot;通讯录服务器&quot;） - 知识公社</title>
+<meta name="description" content="第 5 章 · DNS 与域名体系实战（亲手搭一台&quot;通讯录服务器&quot;）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-5-章-dns-与域名体系实战-亲手搭一台-通讯录服务器">第 5 章 · DNS 与域名体系实战（亲手搭一台"通讯录服务器"）</h1>
+<blockquote>第 2 章你知道了"DNS 是互联网的通讯录"。本章你要<strong>亲手搭一台 DNS 服务器</strong>：自己管的域名、正向反向解析、主从复制——全配一遍。</blockquote>
+<blockquote>这是世界赛 Module A（A04、A13 评分点）和 Module B（NW-SRV 评分点）的核心考点，也是很多公司内部系统的刚需。</blockquote>
+<blockquote>预计学习时间：1-2 周。</blockquote>
+<hr>
+<h2 id="5-1-先复习-补三个新概念">5.1 先复习 + 补三个新概念</h2>
+<h3 id="复习-第-2-章">复习（第 2 章）</h3>
+<ul>
+<li>DNS 把域名翻译成 IP。</li>
+<li>查询命令：<code>dig baidu.com</code>、<code>nslookup baidu.com</code></li>
+</ul>
+<h3 id="新概念-1-权威服务器-vs-递归服务器">新概念 1：权威服务器 vs 递归服务器</h3>
+<div class="tw"><table><thead><tr><th>角色</th><th>干什么</th><th>例子</th></tr></thead><tbody>
+<tr><td><strong>权威服务器</strong>（Authoritative）</td><td>"这个域名归我管，问我准没错"</td><td>你马上要搭的那台</td></tr>
+<tr><td><strong>递归服务器</strong>（Recursive/Resolver）</td><td>"你问啥我都帮你四处打听"</td><td>运营商 DNS、8.8.8.8</td></tr>
+</tbody></table></div>
+<blockquote>比喻：权威服务器 = 派出所户籍科（档案就在他那）；递归服务器 = 114 查号台（他会帮你转接各个部门）。</blockquote>
+<h3 id="新概念-2-区域-zone-与区域文件">新概念 2：区域（Zone）与区域文件</h3>
+<p>一个域名（比如 <code>mycompany.local</code>）的全部记录写成文件，就是<strong>区域文件（zone file）</strong>。里面是一行行的"记录"。</p>
+<h3 id="新概念-3-各种记录类型-考试和面试天天见">新概念 3：各种记录类型（<strong>考试和面试天天见</strong>）</h3>
+<div class="tw"><table><thead><tr><th>类型</th><th>含义</th><th>例子</th></tr></thead><tbody>
+<tr><td><strong>A</strong></td><td>域名 → IPv4 地址</td><td><code>www  A  192.168.1.10</code></td></tr>
+<tr><td><strong>AAAA</strong></td><td>域名 → IPv6 地址</td><td><code>www  AAAA  2001:db8::10</code></td></tr>
+<tr><td><strong>CNAME</strong></td><td>别名 → 另一个域名</td><td><code>blog  CNAME  www</code>（blog 是 www 的小名）</td></tr>
+<tr><td><strong>MX</strong></td><td>邮件服务器地址</td><td><code>@  MX 10 mail.mycompany.local</code></td></tr>
+<tr><td><strong>TXT</strong></td><td>文本备注（验证域名、反垃圾）</td><td><code>@  TXT "v=spf1 ..."</code></td></tr>
+<tr><td><strong>NS</strong></td><td>这个域名由哪台服务器管</td><td><code>@  NS  ns1.mycompany.local</code></td></tr>
+<tr><td><strong>PTR</strong></td><td>IP → 域名（反向解析专用）</td><td><code>10  PTR  www.mycompany.local</code></td></tr>
+<tr><td><strong>SOA</strong></td><td>区域的"出生证明"（主服务器、序列号等）</td><td>每个区域文件第一行</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-2-实战-搭建-bind9-linux-世界最标准的-dns-软件">5.2 实战：搭建 BIND9（Linux 世界最标准的 DNS 软件）</h2>
+<h3 id="5-2-1-安装">5.2.1 安装</h3>
+<pre><code>sudo apt update
+sudo apt install -y bind9 bind9utils dnsutils
+sudo systemctl status bind9     # 确认 running</code></pre>
+<h3 id="5-2-2-认识配置文件">5.2.2 认识配置文件</h3>
+<pre><code>ls /etc/bind/</code></pre>
+<p>关键文件：</p>
+<pre><code>/etc/bind/named.conf            ← 总配置（它只是&quot;入口&quot;）
+/etc/bind/named.conf.options    ← 全局选项（转发器、监听地址等）
+/etc/bind/named.conf.local      ← 我们写&quot;管哪些域名&quot;的地方 ★
+/etc/bind/db.local              ← 示例区域文件（拿它当模板）</code></pre>
+<h3 id="5-2-3-第一步-告诉-bind-你来管-mycompany-local-这个域名">5.2.3 第一步：告诉 BIND "你来管 mycompany.local 这个域名"</h3>
+<pre><code>sudo nano /etc/bind/named.conf.local</code></pre>
+<p>加入：</p>
+<pre><code>zone &quot;mycompany.local&quot; {
+    type master;                          // 我是主服务器
+    file &quot;/etc/bind/zones/db.mycompany&quot;;  // 数据在这个文件里
+};
+
+zone &quot;1.168.192.in-addr.arpa&quot; {           // 反解区域（名字是网络号倒着写）
+    type master;                          // 关于 192.168.1.x 的 IP→域名 查询
+    file &quot;/etc/bind/zones/db.192.168.1&quot;;
+};</code></pre>
+<p><strong>解释反解区名的由来</strong>：<code>192.168.1.x</code> 要倒着写成 <code>1.168.192.in-addr.arpa</code>（这是 DNS 规定的格式，照写即可）。</p>
+<h3 id="5-2-4-第二步-写正向区域文件-域名-ip">5.2.4 第二步：写正向区域文件（域名→IP）</h3>
+<pre><code>sudo mkdir -p /etc/bind/zones
+sudo nano /etc/bind/zones/db.mycompany</code></pre>
+<p>写入（<strong>逐行给你注释</strong>）：</p>
+<pre><code>;
+; mycompany.local 的区域文件
+;
+$TTL 604800                     ; 缓存存活时间（秒），一周
+@       IN      SOA     ns1.mycompany.local. admin.mycompany.local. (
+                              2026091601      ; 序列号（改动后必须+1，从服务器靠它判断更新！）
+                              604800          ; 刷新时间
+                              86400           ; 重试时间
+                              2419200         ; 过期时间
+                              604800 )        ; 否定缓存 TTL
+
+; 名字服务器记录（谁管这个域名）
+@       IN      NS      ns1.mycompany.local.
+
+; 主机记录（★用得最多）
+ns1     IN      A       192.168.1.10        ; DNS 服务器自己
+www     IN      A       192.168.1.10        ; 网站
+mail    IN      A       192.168.1.20        ; 邮件服务器
+@       IN      A       192.168.1.10        ; &quot;@代表域名本身&quot;（mycompany.local 直接访问也指向它）
+
+; 别名
+blog    IN      CNAME   www                 ; blog.mycompany.local 是 www 的别名
+
+; 邮件
+@       IN      MX      10 mail.mycompany.local.</code></pre>
+<p><strong>三个必记细节（评分脚本盯的就是这些）</strong>：</p>
+<ol>
+<li><strong>每条记录末尾有 <code>.</code>（点）的才是完整域名</strong>！<code>ns1.mycompany.local.</code>（带点）≠ <code>ns1.mycompany.local</code>（不带点，会被自动补上区域名变成 <code>ns1.mycompany.local.mycompany.local</code>——经典翻车点）。</li>
+<li><code>@</code> 代表"区域名本身"。</li>
+<li>SOA 里的<strong>序列号</strong>改一次记录要 +1。</li>
+</ol>
+<h3 id="5-2-5-第三步-写反向区域文件-ip-域名">5.2.5 第三步：写反向区域文件（IP→域名）</h3>
+<pre><code>sudo nano /etc/bind/zones/db.192.168.1</code></pre>
+<pre><code>$TTL 604800
+@       IN      SOA     ns1.mycompany.local. admin.mycompany.local. (
+                              2026091601
+                              604800 86400 2419200 604800 )
+
+@       IN      NS      ns1.mycompany.local.
+
+; 反向记录：把 IP 的最后一段写在最前面
+10      IN      PTR     www.mycompany.local.     ; 192.168.1.10 → www.mycompany.local
+10      IN      PTR     ns1.mycompany.local.     ; 同一个IP可以对应多个名字
+20      IN      PTR     mail.mycompany.local.</code></pre>
+<h3 id="5-2-6-第四步-检查-启动-三步验证-每一步都要做">5.2.6 第四步：检查 + 启动（<strong>三步验证，每一步都要做</strong>）</h3>
+<pre><code># ① 检查配置文件语法
+sudo named-checkconf
+# 没有任何输出 = 语法 OK（有问题它会告诉你第几行）
+
+# ② 检查两个区域文件的语法
+sudo named-checkzone mycompany.local /etc/bind/zones/db.mycompany
+sudo named-checkzone 1.168.192.in-addr.arpa /etc/bind/zones/db.192.168.1
+# 输出关键行：zone mycompany.local/IN: loaded serial 2026091601   → OK！
+
+# ③ 重启服务
+sudo systemctl restart bind9
+sudo systemctl status bind9     # active (running)</code></pre>
+<h3 id="5-2-7-第五步-验证-查询自己的-dns-服务器">5.2.7 第五步：验证（查询自己的 DNS 服务器！）</h3>
+<pre><code># 问本机 DNS 要 www 的 IP
+dig @127.0.0.1 www.mycompany.local
+
+# 看 ANSWER SECTION：
+# www.mycompany.local.  604800  IN  A  192.168.1.10   ← 对上了！</code></pre>
+<p>逐条试：</p>
+<pre><code>dig @127.0.0.1 blog.mycompany.local          # CNAME → 会显示两级：blog→www→IP
+dig @127.0.0.1 mycompany.local               # @ 记录
+dig -x 192.168.1.20 @127.0.0.1               # ★ -x = 反向查询：IP→域名
+dig @127.0.0.1 mycompany.local MX            # 查邮件记录
+dig @127.0.0.1 mycompany.local NS            # 查名字服务器</code></pre>
+<p><strong>五个查询全对 → 你搭好了一台真正的 DNS 服务器！</strong></p>
+<h3 id="5-2-8-让系统真的用你这台-dns-可选">5.2.8 让系统真的用你这台 DNS（可选）</h3>
+<pre><code># 临时指定（每次查询时用）——上面 dig @127.0.0.1 就是这种方式
+# 永久指定（把系统 DNS 换成本机）：
+sudo nano /etc/resolv.conf
+# 把 nameserver 那行改成：
+nameserver 127.0.0.1
+# 然后：
+nslookup www.mycompany.local     # 不带 @ 也走我们的服务器了</code></pre>
+<blockquote>注意：云服务器上的 resolv.conf 常被网络服务自动覆盖。练习用 dig @ 指定最省事。</blockquote>
+<hr>
+<h2 id="5-3-进阶-主从复制-两台-dns-坏一台不慌">5.3 进阶：主从复制（两台 DNS，坏一台不慌）</h2>
+<p><strong>为什么要主从？</strong> 一台 DNS 挂了，整个公司的网络就"瞎"了（所有域名都解析不了）。所以生产上都至少两台：<strong>主（master）+ 从（slave）</strong>。从服务器自动同步主的记录。</p>
+<h3 id="5-3-1-演练环境">5.3.1 演练环境</h3>
+<ul>
+<li>主服务器：假设 IP 是 192.168.1.10（你现在的机器）</li>
+<li>从服务器：另一台 Linux 虚拟机，IP 192.168.1.11（没有第二台机器？就先把配置写出来，逻辑看懂即可）</li>
+</ul>
+<h3 id="5-3-2-主服务器加一条-允许谁来同步">5.3.2 主服务器加一条"允许谁来同步"</h3>
+<p>在 <code>named.conf.local</code> 的 zone 里加上：</p>
+<pre><code>zone &quot;mycompany.local&quot; {
+    type master;
+    file &quot;/etc/bind/zones/db.mycompany&quot;;
+    allow-transfer { 192.168.1.11; };     // ★ 只允许从服务器拉数据
+};</code></pre>
+<h3 id="5-3-3-从服务器上配置-在-192-168-1-11-上">5.3.3 从服务器上配置（在 192.168.1.11 上）</h3>
+<pre><code>sudo apt install -y bind9
+sudo nano /etc/bind/named.conf.local</code></pre>
+<pre><code>zone &quot;mycompany.local&quot; {
+    type slave;                              // 我是从服务器
+    masters { 192.168.1.10; };               // 跟谁同步
+    file &quot;/var/cache/bind/db.mycompany.slave&quot;;  // 同步来的数据存哪（自动生成）
+};</code></pre>
+<pre><code>sudo named-checkconf &amp;&amp; sudo systemctl restart bind9
+ls /var/cache/bind/          # 等几秒，应该出现 db.mycompany.slave
+dig @192.168.1.11 www.mycompany.local   # 从服务器能解析 = 主从打通！</code></pre>
+<p><strong>验证同步</strong>：在主服务器改个记录（改完记得序列号 +1 → <code>systemctl restart bind9</code>），到从服务器 <code>dig</code> 看新记录出现没。（主从的坑基本都在：序列号没加、allow-transfer 没配置、防火墙拦了 53 端口。）</p>
+<h3 id="5-3-4-测试-主挂掉-高可用思想">5.3.4 测试"主挂掉"（高可用思想）</h3>
+<pre><code># 在主服务器上：
+sudo systemctl stop bind9
+# 在从服务器上仍然能查询：
+dig @192.168.1.11 www.mycompany.local     # 哇，照常工作！</code></pre>
+<p><strong>这就是"冗余"的意义。</strong> 高可用不是玄学，就是"多准备一份，坏了一个还有另一个"。</p>
+<hr>
+<h2 id="5-4-dns-排错与高级技巧">5.4 DNS 排错与高级技巧</h2>
+<h3 id="5-4-1-dig-输出怎么读-看一次就懂">5.4.1 dig 输出怎么读（看一次就懂）</h3>
+<pre><code>dig @127.0.0.1 www.mycompany.local</code></pre>
+<pre><code>;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, ...
+;; flags: qr aa rd ra;      ← 关键！aa = Authoritative（权威回答，&quot;我知道&quot;，不是转发的）
+;; QUESTION SECTION:
+;www.mycompany.local.  IN  A
+;; ANSWER SECTION:
+www.mycompany.local. 604800 IN A 192.168.1.10    ← 这就是答案</code></pre>
+<ul>
+<li><code>status: NOERROR</code> = 正常；<code>NXDOMAIN</code> = 域名不存在；<code>SERVFAIL</code> = 服务器内部错误</li>
+<li><code>aa</code> 标志 = 权威回答（检查你查对了服务器没有）</li>
+<li><strong>看 ANSWER 里有没有结果、结果对不对，是排错的核心动作。</strong></li>
+</ul>
+<h3 id="5-4-2-检查-别人为什么能-不能查到">5.4.2 检查"别人为什么能/不能查到"</h3>
+<pre><code>dig +trace www.baidu.com      # 从根服务器开始，一步步追踪完整解析路径（教学神器）
+dig www.baidu.com @8.8.8.8    # 换谷歌 DNS 查（判断&quot;是你 DNS 的问题还是网站的问题&quot;）</code></pre>
+<p><strong>排错黄金三问</strong>：</p>
+<ol>
+<li>直接问我自己的 DNS（<code>dig @127.0.0.1 域名</code>）→ 通吗？</li>
+<li>问公共 DNS（<code>dig 域名 @8.8.8.8</code>）→ 通吗？</li>
+<li>如果 1 不通 2 通 → <strong>你的 DNS 服务器有问题</strong>；都通 → 是客户端配置问题；都不通 → 域名本身/上游问题。</li>
+</ol>
+<h3 id="5-4-3-泛解析-一条顶一万条">5.4.3 泛解析（一条顶一万条）</h3>
+<pre><code>*.mycompany.local   IN  A  192.168.1.10</code></pre>
+<p>这一条让 <code>随便什么.mycompany.local</code> 全都解析到同一个 IP。（大公司用来做"测试环境随机域名"。）</p>
+<h3 id="5-4-4-缓存与-ttl-为什么改了记录不生效">5.4.4 缓存与 TTL（"为什么改了记录不生效"）</h3>
+<ul>
+<li>DNS 到处都有缓存（你自己的电脑、路由器、你的 DNS 服务器、公共 DNS）</li>
+<li>每条记录有 TTL（存活时间），别人会缓存这么久</li>
+<li><strong>改记录后马上验证没变化 → 是缓存。</strong> 用 <code>dig +short</code> 多等或到缓存过期（或直接问权威：<code>dig @权威IP</code>）。</li>
+</ul>
+<hr>
+<h2 id="5-5-练习与自我检验">5.5 练习与自我检验</h2>
+<h3 id="练习">练习</h3>
+<ol>
+<li>搭好 BIND9，实现 <code>www</code>、<code>mail</code>、<code>blog</code>（CNAME）三条记录并 dig 验证</li>
+<li>配好反向解析，<code>dig -x</code> 能查到域名</li>
+<li>把 www 的 IP 改成 192.168.1.99，<strong>记得序列号 +1</strong>，重启验证生效</li>
+<li>（两台机器）配主从复制，停掉主服务器后从服务器仍能解析</li>
+<li>（进阶）加一条 MX 记录指向 mail，用 <code>dig MX</code> 验证</li>
+</ol>
+<h3 id="自检清单">自检清单</h3>
+<ul>
+<li>[ ] 我能说出 A/AAAA/CNAME/MX/PTR/NS/SOA 各自的作用</li>
+<li>[ ] 我独立配过 named.conf.local 的两个 zone（正+反）</li>
+<li>[ ] 我知道"记录末尾的点"的坑，知道序列号的作用</li>
+<li>[ ] 我会用 named-checkconf / named-checkzone / dig / dig -x 验证</li>
+<li>[ ] 我理解权威 vs 递归，验证过"主挂从顶"的高可用</li>
+<li>[ ] 我理解 TTL 与缓存导致的"改了不生效"</li>
+</ul>
+<h3 id="对应真题">对应真题</h3>
+<ul>
+<li>世界赛 Module A 评分点：A04（主从、递归、v4/v6 反向区）、A13（A/AAAA/CNAME 记录逐条检查）——<strong>本章就是它的真题对应教程</strong></li>
+<li>世界赛 Module B：NW-SRV 的"secondary zone transfer"（Windows DNS 从区传输）</li>
+<li>中国国赛：DNS 服务器搭建是私有云题目的标配小题</li>
+</ul>
+<p><strong>恭喜，DNS 这座"网络世界的户口本"你已经亲手做过一遍了。</strong></p>
+</div>
+</body>
+</html>

@@ -167,7 +167,7 @@ function renderCatalog(){
     });
     h+='</div>';
   }
-  h+='<div class="card" style="margin-top:14px"><p class="small"><b>配套</b>：<a href="index.html">模拟中心（赛事地图与全部卷目）</a> · <a href="../labs/README.md">浏览器实训场</a> · <a href="../labs/README.md">真机环境搭建</a> · <a href="../labs/cloudlab/README.md">四层通关任务书</a></p></div>';
+  h+='<div class="card" style="margin-top:14px"><p class="small"><b>配套</b>：<a href="index.html">模拟中心（赛事地图与全部卷目）</a> · <a href="../labs/README.html">浏览器实训场</a> · <a href="../labs/README.html">真机环境搭建</a> · <a href="../labs/cloudlab/README.html">四层通关任务书</a></p></div>';
   app.innerHTML=h;
   app.querySelectorAll('[data-go]').forEach(function(b){b.onclick=function(){location.search='?paper='+b.getAttribute('data-go');};});
   app.querySelectorAll('[data-hist]').forEach(function(b){b.onclick=function(){showReport(PAPERS[b.getAttribute('data-hist')],loadState(b.getAttribute('data-hist')).report,true);};});

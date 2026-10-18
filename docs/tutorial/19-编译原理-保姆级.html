@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 19 章 · 编译原理（从&quot;翻译官&quot;到亲手写一个编译器） - 知识公社</title>
+<meta name="description" content="第 19 章 · 编译原理（从&quot;翻译官&quot;到亲手写一个编译器）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-19-章-编译原理-从-翻译官-到亲手写一个编译器">第 19 章 · 编译原理（从"翻译官"到亲手写一个编译器）</h1>
+<blockquote><strong>编译原理 = 把"人话"翻译成"机器话"的全部学问。</strong></blockquote>
+<blockquote>它是计算机科学里最漂亮的一门课：你学会了它，就看穿了所有语言、所有框架背后的"翻译层"。</blockquote>
+<blockquote>学完这一章，你能：说清编译器的七个阶段 → 读懂 LL/LR 这些术语 → <strong>亲手写出一个能跑的小语言编译器（本章附完整代码，已实测跑通）</strong> → 知道接下来怎么练到专家。</blockquote>
+<blockquote>预计学习时间：3-4 周（理论 1 周 + 动手 2 周，动手部分本章直接给你代码和脚手架）。</blockquote>
+<hr>
+<h2 id="19-1-编译原理到底学什么">19.1 编译原理到底学什么</h2>
+<h3 id="19-1-1-一个类比先看懂全部">19.1.1 一个类比先看懂全部</h3>
+<p>你写的是：<code>x = 10; print(x * 2 + 5);</code></p>
+<p>CPU 只认识：一卡车"把内存第 7 号格的数搬到寄存器"这样的指令。</p>
+<p><strong>中间的翻译官，就是编译器。</strong> 编译原理研究的，就是怎么把这件事做得<strong>又快又对</strong>：</p>
+<ul>
+<li>怎么读懂"人话"？（词法、语法分析）</li>
+<li>怎么确认"话说得有道理"？（语义分析）</li>
+<li>怎么翻译得又快又省？（中间代码、优化）</li>
+<li>怎么落到目标机器？（代码生成）</li>
+</ul>
+<h3 id="19-1-2-为什么值得学-不只为写编译器">19.1.2 为什么值得学（不只为写编译器）</h3>
+<div class="tw"><table><thead><tr><th>你以后做</th><th>编译原理给你的</th></tr></thead><tbody>
+<tr><td>写业务代码</td><td>理解语言特性（闭包、泛型、元编程）为什么这样设计</td></tr>
+<tr><td>调性能</td><td>看懂 <code>-O2</code> 做了什么、为什么这里慢</td></tr>
+<tr><td>做架构</td><td>解析器思维=把任何文本变成结构（JSON/DSL/日志分析到处是）</td></tr>
+<tr><td>学安全</td><td>注入、反序列化漏洞本质就是"翻译边界没把好"</td></tr>
+<tr><td>面试</td><td>JIT、GC、AOT、静态分析是高频话题</td></tr>
+<tr><td>造轮子</td><td>想写语言/DSL/代码生成器？这就是入场券</td></tr>
+</tbody></table></div>
+<h3 id="19-1-3-三条翻译路线-先分清概念">19.1.3 三条翻译路线（先分清概念）</h3>
+<div class="tw"><table><thead><tr><th>路线</th><th>代表</th><th>过程</th><th>特点</th></tr></thead><tbody>
+<tr><td><strong>编译型</strong></td><td>C / Rust / Go</td><td>源码 → 机器码，直接执行</td><td>快，但要先编译</td></tr>
+<tr><td><strong>解释型</strong></td><td>Python / (早期)JS</td><td>源码 → 边解释边执行</td><td>灵活，但慢</td></tr>
+<tr><td><strong>混合型</strong></td><td>Java / C# / 现代JS</td><td>源码 → 字节码 → JIT 编译执行</td><td>平衡，现代主流</td></tr>
+</tbody></table></div>
+<blockquote>现代世界的真相：界限早已模糊。V8 会把热点 JS 直接编译成机器码；Python 也有 PyPy JIT；C# 可以 AOT。<strong>理解中间层，才能理解现代语言。</strong></blockquote>
+<hr>
+<h2 id="19-2-全景图-编译器的七个阶段">19.2 全景图：编译器的七个阶段</h2>
+<pre><code>源码 &quot;x = 10;&quot;
+  │
+  ▼
+① 词法分析 Lexer     →  切成 token 流（id:x, =, num:10, ;）
+  │
+  ▼
+② 语法分析 Parser    →  组装成 AST（语法树）
+  │
+  ▼
+③ 语义分析           →  查符号表、查类型（x 声明过吗？类型对吗？）
+  │
+  ▼
+④ 中间代码 IR        →  三地址码/字节码（与机器无关的形态）
+  │
+  ▼
+⑤ 优化               →  常量折叠、死代码消除、内联…
+  │
+  ▼
+⑥ 目标代码生成       →  机器码 / 汇编 / 字节码
+  │
+  ▼
+⑦ 链接（可执行文件）  →  与库合并，产出程序
+      [ 符号表 + 错误处理 全程伴随 ]</code></pre>
+<p><strong>一句话记忆</strong>：<strong>词、句、义、中、优、码、链</strong>——前四个阶段叫"前端"（跟语言相关），后面叫"后端"（跟机器相关）。这也是为什么 LLVM 能让 C/C++/Rust/Swift 共享同一套优化器：<strong>前端千差万别，后端殊途同归</strong>。</p>
+<hr>
+<h2 id="19-3-词法分析-把字符流切成-词">19.3 词法分析：把字符流切成"词"</h2>
+<p><strong>任务</strong>：纯字符 → 有意义的 token。规则就是"模式匹配"。</p>
+<div class="tw"><table><thead><tr><th>词素</th><th>token 类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>x</code> <code>print</code></td><td>标识符/关键字</td><td>字母开头的字母数字串</td></tr>
+<tr><td><code>10</code> <code>3.14</code></td><td>数字字面量</td><td>位数/小数点</td></tr>
+<tr><td><code>+</code> <code>*</code> <code>==</code></td><td>运算符</td><td><strong>最长匹配</strong>（<code>=</code> 和 <code>==</code> 分得清）</td></tr>
+<tr><td>空格/换行</td><td>忽略</td><td>但行号要记（报错用）</td></tr>
+</tbody></table></div>
+<p><strong>理论核心</strong>：每种 token 用<strong>正则表达式</strong>描述 → 正则可以转成<strong>有限自动机（DFA）</strong> → DFA 就是"读一个字符走一步"的状态机。</p>
+<p><strong>为什么要学自动机而不是随便写？</strong> 因为工具（flex/lex）把"正则 → DFA"全自动化了：你写规则，它生成代码。这就是很多"编程语言课设"里"用 flex 做词法"的由来。</p>
+<hr>
+<h2 id="19-4-语法分析-把-词-拼成-句">19.4 语法分析：把"词"拼成"句"</h2>
+<p><strong>任务</strong>：token 流 → 语法树（AST）。规则是<strong>文法</strong>（上下文无关文法 CFG）。</p>
+<pre><code>表达式文法：
+  expr  → expr + term | term        （表达式是 加法 或 单项）
+  term  → term * factor | factor     （单项是 乘法 或 因子）
+  factor → number | ( expr )        （因子是 数字 或 括号表达式）</code></pre>
+<p><strong>优先级、结合性怎么体现？</strong> 关键就在文法的<strong>层次</strong>：乘法的规则"更深一层"，所以它先算。<code>2 + 3 * 4</code> 的树自然长成 <code>2 + (3*4)</code>。</p>
+<p><strong>两大流派</strong>：</p>
+<div class="tw"><table><thead><tr><th>流派</th><th>方法</th><th>特点</th><th>谁在用</th></tr></thead><tbody>
+<tr><td><strong>自顶向下</strong></td><td>递归下降</td><td>好写、好懂、好报错</td><td>手写解析器（大多数实用编译器）</td></tr>
+<tr><td><strong>自底向上</strong></td><td>LR 分析</td><td>理论漂亮、能处理的文法广</td><td>yacc/bison（生成器）</td></tr>
+</tbody></table></div>
+<p>考试的重头戏（FIRST/FOLLOW 集、LR 分析表）就在这一节——<strong>先建立起"它们只是两种自动拼句的方法"的直觉，再去死磕表格的计算，就不容易晕</strong>。</p>
+<p><strong>递归下降的核心写法</strong>（记住这个套路，实战最有用）：每个文法规则写成一个函数，函数内部看到什么 token 就调什么函数。</p>
+<hr>
+<h2 id="19-5-语义分析-确认-话有道理">19.5 语义分析：确认"话有道理"</h2>
+<p>语法只保证"结构合法"，语义要保证"意思成立"：</p>
+<ul>
+<li><code>x = y + 1;</code> 里 <strong>y 声明过吗？</strong>（符号表查询）</li>
+<li><code>"hello" + 1</code> <strong>类型对吗？</strong>（类型检查）</li>
+<li>变量作用域（局部/全局）、重复定义、函数调用参数数量……</li>
+</ul>
+<p><strong>符号表</strong>是语义分析的主战场：一个"名字 → 类型/位置/作用域"的登记本，用栈结构管理作用域进出（进入代码块 push，离开 pop）。</p>
+<blockquote>一句话：<strong>语法 = 造句法（主谓宾对不对），语义 = 语义学（这句话有没有意义）。</strong> "绿色的梦在抱怨"——语法对，语义不通。</blockquote>
+<hr>
+<h2 id="19-6-中间表示与代码生成">19.6 中间表示与代码生成</h2>
+<p>直接从前端生成机器码？太笨——每种语言×每种机器=重写一遍。 正解：先降到<strong>中间表示（IR）</strong>：</p>
+<div class="tw"><table><thead><tr><th>IR 形态</th><th>样子</th><th>用在哪</th></tr></thead><tbody>
+<tr><td>AST 直接走</td><td>树遍历求值</td><td>解释器</td></tr>
+<tr><td>三地址码</td><td><code>t1 = a + b</code></td><td>优化/教学/编译器后端</td></tr>
+<tr><td>字节码</td><td><code>LOAD a; LOAD b; ADD</code></td><td>JVM、CPython、.NET</td></tr>
+<tr><td>SSA</td><td>每个变量只赋值一次</td><td>LLVM、现代优化</td></tr>
+</tbody></table></div>
+<p><strong>例子</strong>：<code>z = (x + y) * -2;</code> 的字节码——</p>
+<pre><code>LOAD x     把 x 压栈
+LOAD y     把 y 压栈
+ADD        弹出两个相加，结果压栈
+PUSH 2     把 2 压栈
+NEG        取负
+MUL        相乘
+STORE z    弹出结果存进 z</code></pre>
+<p><strong>看懂了吗</strong>：编译 =把树"拉直"成一串命令；运行 =一台"栈机器"按命令走。本章 19.8 节你会亲手实现这套东西。</p>
+<hr>
+<h2 id="19-7-优化入门-为什么--o2-能快一倍">19.7 优化入门：为什么 <code>-O2</code> 能快一倍</h2>
+<div class="tw"><table><thead><tr><th>优化</th><th>做了什么</th><th>例子</th></tr></thead><tbody>
+<tr><td>常量折叠</td><td>编译期算好常数</td><td><code>2*3+1</code> → <code>7</code></td></tr>
+<tr><td>常量传播</td><td>常量带入</td><td><code>x=5; y=x+1;</code> → <code>y=6</code></td></tr>
+<tr><td>死代码消除</td><td>删永远走不到/没用的代码</td><td><code>if(1){A}else{B}</code> → 只留 A</td></tr>
+<tr><td>公共子表达式</td><td>重复计算只算一次</td><td><code>a*b</code> 出现 3 次 → 算 1 次</td></tr>
+<tr><td>内联</td><td>函数体展开</td><td>小函数直接铺开</td></tr>
+<tr><td>循环不变量外提</td><td>循环里不变的搬到外面</td><td><code>for(i..){ y = k*2+1 }</code></td></tr>
+</tbody></table></div>
+<blockquote>优化要<strong>保证语义不变</strong>——这就是为什么它难：既要激进（快），又要保守（对）。安全领域的"编译器级对抗"（比如某些壳利用优化行为藏代码）也源自这里。</blockquote>
+<hr>
+<h2 id="19-8-动手-亲手写一个完整的-mini-编译器-已实测">19.8 动手：亲手写一个完整的 mini 编译器（已实测）</h2>
+<blockquote>下面这套代码实现了<strong>一个完整的小语言编译器</strong>：词法 → 语法 → ①直接解释 ②编译成字节码并用虚拟机执行。<strong>每个部分我都实跑验证过</strong>，你可以直接复制到电脑上运行（存成 mini_lang.py，<code>python3 mini_lang.py</code>）。</blockquote>
+<p><strong>我们的玩具语言长这样</strong>：</p>
+<pre><code>x = 10;
+y = x * 2 + 5;
+print(y);
+if (y &gt; 20) { print(y - 100); } else { print(0); }
+z = (x + y) * -2;
+print(z);</code></pre>
+<h3 id="19-8-1-①-词法分析-约-20-行">19.8.1 ① 词法分析（约 20 行）</h3>
+<pre><code>import re
+TOKEN_RE = re.compile(r&quot;&quot;&quot;
+    (?P&lt;num&gt;\d+)
+  | (?P&lt;id&gt;[A-Za-z_]\w*)
+  | (?P&lt;op&gt;==|&lt;=|&gt;=|[-+*/(){};=&lt;&gt;])
+  | (?P&lt;ws&gt;\s+)
+&quot;&quot;&quot;, re.X)
+
+def tokenize(src):
+    tokens, pos = [], 0
+    while pos &lt; len(src):
+        m = TOKEN_RE.match(src, pos)
+        if not m:
+            raise SyntaxError(&quot;无法识别的字符: %r&quot; % src[pos])
+        pos = m.end()
+        if m.lastgroup == &quot;ws&quot;:
+            continue
+        tokens.append((m.lastgroup, m.group()))
+    tokens.append((&quot;eof&quot;, &quot;&quot;))
+    return tokens</code></pre>
+<p>实际效果（真实运行输出）：</p>
+<pre><code>x = 10;  →  [(&#x27;id&#x27;,&#x27;x&#x27;), (&#x27;op&#x27;,&#x27;=&#x27;), (&#x27;num&#x27;,&#x27;10&#x27;), (&#x27;op&#x27;,&#x27;;&#x27;) ...]</code></pre>
+<h3 id="19-8-2-②-语法分析-递归下降-ast-核心骨架">19.8.2 ② 语法分析：递归下降 → AST（核心骨架）</h3>
+<p>文法先写清楚（这一步叫"设计语言"）：</p>
+<pre><code>program := stmt*
+stmt    := ident &#x27;=&#x27; expr &#x27;;&#x27; | &#x27;print&#x27; &#x27;(&#x27; expr &#x27;)&#x27; &#x27;;&#x27;
+         | &#x27;if&#x27; &#x27;(&#x27; expr &#x27;)&#x27; block (&#x27;else&#x27; block)?
+expr    := add ((&#x27;&lt;&#x27;|&#x27;&gt;&#x27;|&#x27;&lt;=&#x27;|&#x27;&gt;=&#x27;|&#x27;==&#x27;) add)?
+add     := mul ((&#x27;+&#x27;|&#x27;-&#x27;) mul)*
+mul     := unary ((&#x27;*&#x27;|&#x27;/&#x27;) unary)*
+unary   := &#x27;-&#x27; unary | primary
+primary := num | ident | &#x27;(&#x27; expr &#x27;)&#x27;</code></pre>
+<p>然后"每个规则一个函数"：</p>
+<pre><code>class Parser:
+    def __init__(self, toks): self.toks, self.i = toks, 0
+    def peek(self): return self.toks[self.i]
+    def next(self):
+        t = self.toks[self.i]; self.i += 1; return t
+    def expect(self, val):
+        t = self.next()
+        if t[1] != val: raise SyntaxError(&quot;期望 %r 得到 %r&quot; % (val, t[1]))
+        return t
+
+    def stmt(self):
+        t = self.peek()
+        if t[1] == &quot;print&quot;:
+            self.next(); self.expect(&quot;(&quot;); e = self.expr(); self.expect(&quot;)&quot;); self.expect(&quot;;&quot;)
+            return (&quot;print&quot;, e)
+        if t[1] == &quot;if&quot;:
+            self.next(); self.expect(&quot;(&quot;); c = self.expr(); self.expect(&quot;)&quot;)
+            th = self.block()
+            el = None
+            if self.peek()[1] == &quot;else&quot;:
+                self.next(); el = self.block()
+            return (&quot;if&quot;, c, th, el)
+        if t[0] == &quot;id&quot;:
+            name = self.next()[1]; self.expect(&quot;=&quot;); e = self.expr(); self.expect(&quot;;&quot;)
+            return (&quot;assign&quot;, name, e)
+        raise SyntaxError(&quot;不认识的语句: %r&quot; % (t,))
+
+    def add(self):
+        node = self.mul()
+        while self.peek()[1] in (&quot;+&quot;, &quot;-&quot;):
+            op = self.next()[1]
+            node = (&quot;bin&quot;, op, node, self.mul())
+        return node
+    # mul / unary / primary 同理（完整版见文末清单文件）</code></pre>
+<p>真实运行效果：</p>
+<pre><code>y = x * 2 + 5;
+→ (&#x27;assign&#x27;, &#x27;y&#x27;, (&#x27;bin&#x27;,&#x27;+&#x27;, (&#x27;bin&#x27;,&#x27;*&#x27;, (&#x27;var&#x27;,&#x27;x&#x27;), (&#x27;num&#x27;,2)), (&#x27;num&#x27;,5)))</code></pre>
+<p><strong>看到了吗</strong>：优先级在树里自动分好了——<code>+</code> 在顶层，<code>*</code> 是它的左孩子。</p>
+<h3 id="19-8-3-③-方式一-直接解释执行-树遍历">19.8.3 ③ 方式一：直接解释执行（树遍历）</h3>
+<pre><code>def evaluate(node, env):
+    k = node[0]
+    if k == &quot;num&quot;: return node[1]
+    if k == &quot;var&quot;: return env.get(node[1], 0)
+    if k == &quot;neg&quot;: return -evaluate(node[1], env)
+    if k == &quot;bin&quot;:
+        a, b = evaluate(node[2], env), evaluate(node[3], env)
+        op = node[1]
+        if op == &quot;+&quot;: return a + b
+        if op == &quot;-&quot;: return a - b
+        if op == &quot;*&quot;: return a * b
+        if op == &quot;/&quot;: return a // b if b else 0
+        if op == &quot;&gt;&quot;: return 1 if a &gt; b else 0
+        # ...其余比较同理</code></pre>
+<p><strong>这就是"解释器"的本质</strong>：顺着树跑，算到哪算到哪。</p>
+<h3 id="19-8-4-④-方式二-编译成字节码-虚拟机执行-升华部分">19.8.4 ④ 方式二：编译成字节码 + 虚拟机执行（升华部分）</h3>
+<p>编译器：树 → 直线指令流。<strong>if 的编译要"回填跳转地址"</strong>（先占位、后填真地址）：</p>
+<pre><code>def compile_node(node, code):
+    k = node[0]
+    if k == &quot;num&quot;: code.append((&quot;PUSH&quot;, node[1]))
+    elif k == &quot;var&quot;: code.append((&quot;LOAD&quot;, node[1]))
+    elif k == &quot;neg&quot;: compile_node(node[1], code); code.append((&quot;NEG&quot;,))
+    elif k == &quot;bin&quot;:
+        compile_node(node[2], code); compile_node(node[3], code)
+        code.append((BINOPS[node[1]],))   # + → ADD 等
+
+def compile_stmts(stmts, code):
+    for s in stmts:
+        if s[0] == &quot;assign&quot;: compile_node(s[2], code); code.append((&quot;STORE&quot;, s[1]))
+        elif s[0] == &quot;print&quot;: compile_node(s[1], code); code.append((&quot;PRINT&quot;,))
+        elif s[0] == &quot;if&quot;:
+            compile_node(s[1], code)
+            jz = len(code); code.append((&quot;JZ&quot;, None))   # 先占位
+            compile_stmts(s[2], code)
+            if s[3]:
+                jmp = len(code); code.append((&quot;JMP&quot;, None))
+                code[jz] = (&quot;JZ&quot;, len(code))            # 回填：条件假→跳去 else
+                compile_stmts(s[3], code)
+                code[jmp] = (&quot;JMP&quot;, len(code))          # 回填：then 完→跳过 else
+            else:
+                code[jz] = (&quot;JZ&quot;, len(code))</code></pre>
+<p>虚拟机：一个数组当"栈"，一个指针当"程序计数器"：</p>
+<pre><code>def vm_run(code, env=None, out=None):
+    env, out, stack, pc = env or {}, out or [], [], 0
+    while pc &lt; len(code):
+        ins = code[pc]; pc += 1
+        op = ins[0]
+        if op == &quot;PUSH&quot;: stack.append(ins[1])
+        elif op == &quot;LOAD&quot;: stack.append(env.get(ins[1], 0))
+        elif op == &quot;STORE&quot;: env[ins[1]] = stack.pop()
+        elif op == &quot;ADD&quot;: b, a = stack.pop(), stack.pop(); stack.append(a + b)
+        elif op == &quot;MUL&quot;: b, a = stack.pop(), stack.pop(); stack.append(a * b)
+        elif op == &quot;JZ&quot;:
+            if stack.pop() == 0: pc = ins[1]
+        elif op == &quot;JMP&quot;: pc = ins[1]
+        elif op == &quot;PRINT&quot;: out.append(stack.pop())
+        elif op == &quot;HALT&quot;: break
+    return out</code></pre>
+<p><strong>真实运行结果</strong>：</p>
+<pre><code>=== 方式一：解释执行输出 ===
+[25, -75, -70]
+
+=== 方式二：生成的字节码（节选）===
+  00  (&#x27;PUSH&#x27;, 10)      08  (&#x27;LOAD&#x27;, &#x27;y&#x27;)      13  (&#x27;JZ&#x27;, 19)
+  01  (&#x27;STORE&#x27;, &#x27;x&#x27;)    09  (&#x27;PRINT&#x27;,)         14  (&#x27;LOAD&#x27;, &#x27;y&#x27;)
+  02  (&#x27;LOAD&#x27;, &#x27;x&#x27;)     10  (&#x27;LOAD&#x27;, &#x27;y&#x27;)      16  (&#x27;SUB&#x27;,)
+  03  (&#x27;PUSH&#x27;, 2)       11  (&#x27;PUSH&#x27;, 20)       17  (&#x27;PRINT&#x27;,)
+  04  (&#x27;MUL&#x27;,)          12  (&#x27;GT&#x27;,)            18  (&#x27;JMP&#x27;, 21)
+  05  (&#x27;PUSH&#x27;, 5)       19  (&#x27;PUSH&#x27;, 0)  ...   21  (&#x27;LOAD&#x27;, &#x27;x&#x27;) ...
+  06  (&#x27;ADD&#x27;,)          20  (&#x27;PRINT&#x27;,)         30  (&#x27;HALT&#x27;,)
+  07  (&#x27;STORE&#x27;, &#x27;y&#x27;)
+
+=== 方式二：虚拟机输出 ===
+[25, -75, -70]
+OK: 解释执行 == 编译执行，结果一致 ✔</code></pre>
+<p><strong>到这一步，你已经亲手走完了"词法→语法→代码生成→执行"的完整闭环。</strong> 这就是编译原理的全部骨架——剩下的是把这个骨架练到工业级：更复杂的语言特性、更好的优化、真正的机器码跳转（见 19.9）。</p>
+<blockquote>📁 完整版代码（约 280 行，含全部注释和演示）见侧栏《第19章附录 · mini 编译器完整代码》文档（可整段复制到电脑运行）。建议：<strong>先跑通，再逐行改</strong>——加个 <code>while</code> 循环？加个字符串类型？每加一个特性，你就真正理解一层。</blockquote>
+<hr>
+<h2 id="19-9-从玩具到工业级-真实世界的编译器">19.9 从玩具到工业级：真实世界的编译器</h2>
+<div class="tw"><table><thead><tr><th>系统</th><th>前端</th><th>中端/IR</th><th>后端</th><th>说明</th></tr></thead><tbody>
+<tr><td>GCC</td><td>各语言前端</td><td>GIMPLE</td><td>各 CPU 后端</td><td>老牌巨兽</td></tr>
+<tr><td>LLVM/Clang</td><td>Clang(C/C++)/Rust/Swift…</td><td>LLVM IR (SSA)</td><td>各 CPU</td><td><strong>现代基础设施</strong>，做新语言都接它</td></tr>
+<tr><td>JVM</td><td>javac → 字节码</td><td>字节码</td><td>JIT(C1/C2)</td><td>运行时再编译热点代码</td></tr>
+<tr><td>CPython</td><td>编译到字节码</td><td>字节码</td><td>解释器循环</td><td>为什么慢：没有 JIT（默认）</td></tr>
+<tr><td>V8</td><td>JS → 字节码</td><td>字节码</td><td>TurboFan JIT</td><td>兼顾启动和峰值</td></tr>
+</tbody></table></div>
+<p><strong>几个让你"哇一下"的事实</strong>：</p>
+<ol>
+<li><strong>Babel/TypeScript 也是编译器</strong>——"source-to-source 编译器"（转译器），前端再往前后挪一格。</li>
+<li><strong>SQL 引擎是编译器</strong>：SQL → 逻辑计划 → 物理计划 → 执行（查询优化器就是它的"优化阶段"）。</li>
+<li><strong>正则引擎、JSON 解析器、Markdown 渲染器</strong>都是词法/语法分析的近亲。</li>
+<li><strong>LLVM</strong> 让你写的 DSL 只需实现一个小前端接上 IR，就能获得世界级优化+全平台支持。</li>
+</ol>
+<hr>
+<h2 id="19-10-学习路线与资源-照着走">19.10 学习路线与资源（照着走）</h2>
+<div class="tw"><table><thead><tr><th>阶段</th><th>用什么</th><th>目标</th></tr></thead><tbody>
+<tr><td>① 先跑起来</td><td><strong>本章 19.8 代码</strong></td><td>亲手跑通全链路（今天）</td></tr>
+<tr><td>② 建立框架</td><td>B站"编译原理"热门视频（见资源库）</td><td>把七阶段和考试术语对上山</td></tr>
+<tr><td>③ 动手写解释器</td><td><strong>《Crafting Interpreters》</strong>（在线免费）</td><td>跟书写完 Lox：树遍历版 + 字节码版</td></tr>
+<tr><td>④ 读工业代码</td><td><strong>chibicc</strong>（Rui Ueyama）</td><td>看真正的 C 编译器怎么组织</td></tr>
+<tr><td>⑤ 系统视角</td><td><strong>Nand2Tetris</strong></td><td>从逻辑门造到编译器</td></tr>
+<tr><td>⑥ 考试冲刺</td><td>教材（龙书/本科教材）+ 真题</td><td>短语、句柄、FIRST/FOLLOW、LR 表</td></tr>
+<tr><td>⑦ 进阶研究</td><td>LLVM 官方 tutorial（Kaleidoscope）</td><td>用 LLVM 实现一门语言的前端</td></tr>
+</tbody></table></div>
+<blockquote>🔗 以上资源的直达链接（全部免费合法）在：App 首页 →「🌐 全网学习资源库」→ 📦 平台·开源 页签。</blockquote>
+<blockquote>🎬 视频课：资源库 → 编译原理区，先看一个"速成/导论"建立框架，再看一个"手写编译器"实录。<strong>哈工大公开课、混子速成、斯坦福 CS143 等已下载到 App 本地（带「📥 已离线」标记的离线即看）。</strong></blockquote>
+<hr>
+<h2 id="19-11-考试与面试高频考点-速查">19.11 考试与面试高频考点（速查）</h2>
+<p><strong>课程考试</strong>：</p>
+<ul>
+<li>词法：正则 ↔ DFA 转换、最长匹配</li>
+<li>语法：推导/规约、最左最右推导、二义性</li>
+<li><strong>短语 / 直接短语 / 素短语 / 句柄</strong>（用语法树自底向上找）</li>
+<li>FIRST / FOLLOW 集计算、LL(1) 判定</li>
+<li>LR(0)/SLR(1)/LR(1) 分析表构造（大题的常客）</li>
+<li>中间代码：三地址码形式、布尔表达式回填</li>
+<li>运行时：活动记录、参数传递、作用域</li>
+</ul>
+<p><strong>面试/工作向</strong>：</p>
+<ul>
+<li>编译型 vs 解释型 vs JIT？——答"翻译时机"和"信息量（运行时信息）"</li>
+<li>为什么 Python 慢（相对 C）？——动态类型+解释执行+无内联优化</li>
+<li><code>volatile</code> / 内存序 / 优化与 UB（未定义行为）的关系</li>
+<li>静态分析工具（ESLint/Clang-Tidy）怎么工作——AST 之上做规则</li>
+<li>如何自己写一个 DSL——前端（解析）+ 中间层（IR）+ 代码生成的三段式</li>
+</ul>
+<hr>
+<h2 id="19-12-自检清单-学完打勾">19.12 自检清单（学完打勾）</h2>
+<ul>
+<li>[ ] 能默画编译器七阶段流水线，并说出每阶段的输入输出</li>
+<li>[ ] 能解释"递归下降"是怎么用函数对应文法规则的</li>
+<li>[ ] 能说清树遍历解释器和字节码虚拟机的区别</li>
+<li>[ ] 亲手跑通 19.8 的代码，并成功加过一个新特性（哪怕只是 <code>%</code> 运算）</li>
+<li>[ ] 知道 LLVM 为什么重要、什么样的场景该用 LLVM</li>
+<li>[ ] 能说清 <code>-O2</code> 里至少 4 种优化的作用</li>
+<li>[ ] 拿一道 LR 分析表大题能说出整体流程（哪怕算不快）</li>
+</ul>
+<blockquote>👉 学完本章 + 第 18 章，你就同时拥有了<strong>硬件视角（一台机器怎么造出来）</strong>和<strong>软件视角（一门语言怎么翻译成机器）</strong>——这两块拼上，计算机世界对你再没有黑箱。</blockquote>
+</div>
+</body>
+</html>

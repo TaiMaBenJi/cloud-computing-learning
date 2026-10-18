@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 10 章 · Docker 容器入门（装软件的终极姿势） - 知识公社</title>
+<meta name="description" content="第 10 章 · Docker 容器入门（装软件的终极姿势）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-10-章-docker-容器入门-装软件的终极姿势">第 10 章 · Docker 容器入门（装软件的终极姿势）</h1>
+<blockquote>前 9 章我们都是"在机器上装软件"。本章开始，你学的软件将装进"盒子"里——<strong>一个盒子打包一切，到哪都能原样运行</strong>。</blockquote>
+<blockquote>这是现代云计算的分水岭技术。国赛"容器云"、韩国赛全流程、所有云平台都建立在它之上。</blockquote>
+<blockquote>预计学习时间：2 周。</blockquote>
+<hr>
+<h2 id="10-1-用-集装箱-理解容器">10.1 用"集装箱"理解容器</h2>
+<h3 id="先回忆痛点">先回忆痛点</h3>
+<p>你在电脑 A 上装了个网站：装了 Python 3.10、Flask 2.3、nginx 1.18……抄到电脑 B 上，报错一堆：Python 版本不对、库缺了、配置文件路径不同……<strong>"在我电脑上明明能跑"是程序员永远的痛。</strong></p>
+<h3 id="集装箱革命">集装箱革命</h3>
+<blockquote>港口运输以前：各种货物散装搬，每种货要专门的搬运方式，换个船就乱套。</blockquote>
+<blockquote>集装箱时代：<strong>所有货物装进标准箱子</strong>。箱子内容不重要，标准是统一的——吊车、货轮、卡车全都能处理。</blockquote>
+<blockquote></blockquote>
+<blockquote><strong>Docker 容器 = 软件的集装箱</strong>：把程序 + 它需要的一切（代码、运行环境、依赖库、配置）打进一个标准盒子。这个盒子在任何装了 Docker 的机器上都能直接运行。</blockquote>
+<h3 id="容器-vs-虚拟机-面试必问-一次讲透">容器 vs 虚拟机（面试必问，一次讲透）</h3>
+<div class="tw"><table><thead><tr><th></th><th>虚拟机</th><th>容器</th></tr></thead><tbody>
+<tr><td>比喻</td><td>独立别墅（自带地基、水管、电）</td><td>公寓单间（共用大楼的水电）</td></tr>
+<tr><td>包含</td><td>完整的操作系统</td><td>只包含程序 + 依赖</td></tr>
+<tr><td>启动</td><td>分钟级</td><td>秒级（甚至毫秒）</td></tr>
+<tr><td>体积</td><td>GB 级</td><td>MB 级</td></tr>
+<tr><td>隔离性</td><td>强（内核都隔离）</td><td>中（共用宿主内核）</td></tr>
+<tr><td>干什么用</td><td>模拟多台独立电脑</td><td>打包运行应用</td></tr>
+</tbody></table></div>
+<p><strong>一句话</strong>：虚拟机虚拟的是"硬件"，容器虚拟的是"操作系统"。<strong>所以轻得多、快得多。</strong></p>
+<hr>
+<h2 id="10-2-安装-docker-与第一个容器">10.2 安装 Docker 与第一个容器</h2>
+<h3 id="10-2-1-安装-ubuntu">10.2.1 安装（Ubuntu）</h3>
+<pre><code>sudo apt update
+sudo apt install -y docker.io
+sudo systemctl enable --now docker     # 启动并设为自启
+docker --version                       # → Docker version 24.x.x
+
+# 让普通用户也能用 docker（不然每条命令都要 sudo）
+sudo usermod -aG docker $USER
+# ★ 执行后要退出重新登录（或 newgrp docker）才生效</code></pre>
+<h3 id="10-2-2-第一个容器-10-秒钟跑起一个网站">10.2.2 第一个容器：10 秒钟跑起一个网站</h3>
+<pre><code>docker run -d -p 8080:80 nginx</code></pre>
+<p>这一条命令发生了什么（<strong>逐段拆解，重要</strong>）：</p>
+<ul>
+<li><code>docker run</code> = 创建并运行一个容器</li>
+<li><code>-d</code> = 后台运行（detached，不霸占终端）</li>
+<li><code>-p 8080:80</code> = 端口映射：<strong>把宿主机的 8080 端口 → 容器的 80 端口</strong>（外面访问 <code>你的IP:8080</code> 就等于访问容器里的 80）</li>
+<li><code>nginx</code> = 用哪个"镜像"（如果你的机器上没有，自动从 Docker Hub 下载）</li>
+</ul>
+<p>验证：</p>
+<pre><code>docker ps                      # 看运行中的容器
+curl http://localhost:8080     # → Welcome to nginx!（来自容器里的 nginx）</code></pre>
+<p><strong>注意：你根本没"安装"过 nginx——它是被装进容器里运行的。</strong> 这就是容器的魔法。</p>
+<h3 id="10-2-3-常用操作全家桶">10.2.3 常用操作全家桶</h3>
+<pre><code>docker ps                      # 运行中的容器
+docker ps -a                   # 所有容器（含已停止的）
+docker stop 容器ID前3位        # 停止
+docker start xxx               # 启动已停止的
+docker rm xxx                  # 删除容器（先 stop）
+docker logs xxx                # 看容器日志 ★排错必备
+docker exec -it xxx bash       # 进入容器内部（-it = 交互式，exit 出来）★最常用
+docker images                  # 本机有哪些镜像
+docker rmi 镜像名               # 删镜像</code></pre>
+<p><strong>动手体验"进入容器"</strong>：</p>
+<pre><code>docker exec -it $(docker ps -q) bash
+# 现在你在容器内部！试试：
+cat /etc/os-release        # 是个 Debian 系统（nginx 镜像的基底）
+ls /usr/share/nginx/html/  # 网站文件在这里
+echo &quot;我的容器网站&quot; &gt; /usr/share/nginx/html/index.html
+exit                       # 退出容器
+# 回到宿主机：
+curl http://localhost:8080   # → 你的修改生效了！</code></pre>
+<p><strong>理解一件事</strong>：容器的文件系统是"里面"的，和宿主机隔离（刚才修改的是容器内部的文件）。<strong>但是！</strong> <code>docker rm</code> 删掉容器后，这些修改就没了——这引出了"数据卷"（10.4 节）。</p>
+<hr>
+<h2 id="10-3-制作自己的镜像-dockerfile">10.3 制作自己的镜像：Dockerfile</h2>
+<p>别人的镜像不算本事，<strong>把自己的程序打包成镜像</strong>才是。这靠 <strong>Dockerfile</strong>（一个"装箱说明书"）。</p>
+<h3 id="10-3-1-第一个-dockerfile-实战">10.3.1 第一个 Dockerfile（实战）</h3>
+<pre><code>mkdir -p ~/docker-lab/myapp &amp;&amp; cd ~/docker-lab/myapp
+nano Dockerfile</code></pre>
+<p>写入：</p>
+<pre><code># 第一行：选择&quot;基底&quot;（从什么镜子上继续搭）
+FROM python:3.11-slim
+
+# 设置工作目录（后面命令的&quot;当前目录&quot;）
+WORKDIR /app
+
+# 复制文件：把宿主机的文件 → 镜像里
+COPY app.py .
+
+# 安装依赖（构建时执行）
+RUN pip install --no-cache-dir flask
+
+# 声明容器对外暴露的端口（文档性质）
+EXPOSE 5000
+
+# 容器启动时执行的命令（只能有一条 CMD）
+CMD [&quot;python&quot;, &quot;app.py&quot;]</code></pre>
+<p>建一个测试应用：</p>
+<pre><code>nano app.py</code></pre>
+<pre><code>from flask import Flask
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def hello():
+    return &quot;&lt;h1&gt;你好，我是容器里的 Flask 应用！&lt;/h1&gt;&quot;
+
+app.run(host=&quot;0.0.0.0&quot;, port=5000)</code></pre>
+<p><strong>构建镜像</strong>（在 Dockerfile 所在目录）：</p>
+<pre><code>docker build -t myapp:v1 .</code></pre>
+<ul>
+<li><code>-t myapp:v1</code> = 给镜像起名叫 myapp，标签 v1</li>
+<li><code>.</code> = "用当前目录的 Dockerfile 构建"（这个点不能丢！）</li>
+</ul>
+<p><strong>运行它</strong>：</p>
+<pre><code>docker run -d -p 5001:5000 myapp:v1
+curl http://localhost:5001
+# → 你好，我是容器里的 Flask 应用！</code></pre>
+<h3 id="10-3-2-dockerfile-指令速查-核心-8-个">10.3.2 Dockerfile 指令速查（核心 8 个）</h3>
+<div class="tw"><table><thead><tr><th>指令</th><th>作用</th><th>例子</th></tr></thead><tbody>
+<tr><td><code>FROM</code></td><td>基础镜像</td><td><code>FROM ubuntu:22.04</code></td></tr>
+<tr><td><code>RUN</code></td><td>构建时执行命令（装软件）</td><td><code>RUN apt install -y curl</code></td></tr>
+<tr><td><code>COPY</code></td><td>复制文件进镜像</td><td><code>COPY . /app</code></td></tr>
+<tr><td><code>WORKDIR</code></td><td>切换工作目录</td><td><code>WORKDIR /app</code></td></tr>
+<tr><td><code>ENV</code></td><td>设置环境变量</td><td><code>ENV MODE=prod</code></td></tr>
+<tr><td><code>EXPOSE</code></td><td>声明端口</td><td><code>EXPOSE 80</code></td></tr>
+<tr><td><code>CMD</code></td><td>启动命令（可被覆盖）</td><td><code>CMD ["nginx"]</code></td></tr>
+<tr><td><code>ENTRYPOINT</code></td><td>启动命令（更固定）</td><td><code>ENTRYPOINT ["python"]</code></td></tr>
+</tbody></table></div>
+<h3 id="10-3-3-多阶段构建-进阶但必须认识">10.3.3 多阶段构建（进阶但必须认识）</h3>
+<p>问题：编译型语言（Go/Java）编译需要一大堆工具，但运行不需要。<strong>多阶段构建</strong>：在一个阶段编译、另一个阶段运行，最终镜像只装运行需要的东西——<strong>体积从 900MB 瘦到 20MB</strong>。</p>
+<pre><code># 阶段1：编译
+FROM golang:1.22 AS builder
+WORKDIR /src
+COPY . .
+RUN go build -o /out/app
+
+# 阶段2：运行（只拿编译好的文件）
+FROM alpine:latest
+COPY --from=builder /out/app /app
+CMD [&quot;/app&quot;]</code></pre>
+<h3 id="10-3-4-推送镜像到仓库-韩国赛必考环节">10.3.4 推送镜像到仓库（韩国赛必考环节）</h3>
+<p>镜像仓库 = "镜像的快递柜"。最常用的是 Docker Hub（公有）和自建 Harbor。</p>
+<pre><code># 登录
+docker login                       # 输入用户名密码
+# 打标签（仓库要求&quot;用户名/镜像名&quot;格式）
+docker tag myapp:v1 你的用户名/myapp:v1
+# 推送
+docker push 你的用户名/myapp:v1
+# 换一台机器拉下来跑（全世界任何一台装了 docker 的机器）
+docker run -d -p 5001:5000 你的用户名/myapp:v1</code></pre>
+<p><strong>这就是"一次构建，到处运行"。</strong> 韩国赛题里的 "build → push ECR → 部署"就这个流程（ECR 是 AWS 的私有镜像仓库）。</p>
+<hr>
+<h2 id="10-4-数据卷-容器的-外接硬盘">10.4 数据卷：容器的"外接硬盘"</h2>
+<p><strong>问题</strong>：容器删了，里面的数据就没了（容器是"一次性"的）。 <strong>解决</strong>：<strong>数据卷（Volume）</strong>——把宿主机的目录/专属存储"挂"进容器。数据存在外面，容器随便删。</p>
+<pre><code># 挂载语法：-v 宿主机路径:容器内路径
+docker run -d -p 8080:80 -v ~/myweb:/usr/share/nginx/html nginx
+echo &quot;数据在宿主机，容器只是用它&quot; &gt; ~/myweb/index.html
+curl http://localhost:8080        # → 看到宿主机上写的文件！</code></pre>
+<pre><code>docker volume create mydata            # 创建&quot;命名卷&quot;（Docker 管理的卷）
+docker run -d -v mydata:/data mysql    # 挂到 mysql 容器
+docker volume ls                       # 看所有卷</code></pre>
+<p><strong>规矩</strong>：数据库等有状态服务<strong>必须挂卷</strong>，否则容器一删数据全没。</p>
+<hr>
+<h2 id="10-5-docker-网络-容器之间怎么说话">10.5 Docker 网络：容器之间怎么说话</h2>
+<pre><code>docker network ls                      # 看网络列表
+docker network create mynet            # 创建自定义网络（推荐做法）
+
+# 两个容器加入同一网络，就能用&quot;容器名&quot;互相访问！
+docker run -d --name web --network mynet nginx
+docker run -it --rm --network mynet curlimages/curl curl http://web
+# ↑ 注意最后直接用了 http://web —— 容器名就是&quot;域名&quot;！</code></pre>
+<p>（<code>--rm</code> = 退出后自动删除容器，临时任务用。） <strong>为什么要自己建网络？</strong> 默认的 bridge 网络里容器只能用 IP 互访；自定义网络支持"用名字互访"（内置 DNS）。<strong>应用 + 数据库的经典组合就靠它互联。</strong></p>
+<hr>
+<h2 id="10-6-docker-compose-一条命令拉起一整套系统">10.6 Docker Compose：一条命令拉起一整套系统</h2>
+<p>真实系统是多容器配合（网站+数据库+缓存）。一个个 <code>docker run</code> 太麻烦——<strong>Compose 用一个 YAML 文件描述全部</strong>。</p>
+<pre><code>sudo apt install -y docker-compose-v2    # 或 docker compose plugin
+mkdir -p ~/docker-lab/stack &amp;&amp; cd ~/docker-lab/stack
+nano docker-compose.yml</code></pre>
+<pre><code>services:
+  web:
+    image: nginx
+    ports:
+      - &quot;8080:80&quot;
+    volumes:
+      - ./html:/usr/share/nginx/html
+    depends_on:
+      - api            # 先起 api 再起 web（顺序）
+
+  api:
+    build: ./api       # 用本地 Dockerfile 构建
+    environment:
+      - DB_HOST=db      # 环境变量传给容器
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=Root123!
+      - MYSQL_DATABASE=appdb
+    volumes:
+      - dbdata:/var/lib/mysql    # 数据持久化
+
+volumes:
+  dbdata:</code></pre>
+<pre><code>docker compose up -d        # 一键启动全部（下载镜像、建网络、按依赖启动）
+docker compose ps           # 看状态
+docker compose logs -f api  # 看某个服务的日志
+docker compose down         # 一键停止并清理</code></pre>
+<p><strong>一个文件，一条命令，整套系统起来。</strong> 这就是"基础设施即代码"思想的第一次亮相（第 13 章会把这个思想推向云端）。</p>
+<hr>
+<h2 id="10-7-排错与自检">10.7 排错与自检</h2>
+<h3 id="docker-高频-5-坑">Docker 高频 5 坑</h3>
+<ol>
+<li><strong><code>Cannot connect to the Docker daemon</code></strong>：Docker 服务没起 → <code>sudo systemctl start docker</code>；或用户不在 docker 组 → 重新登录。</li>
+<li><strong>端口冲突</strong>：8080 已被占 → <code>ss -tlnp | grep 8080</code> 找出占用者，换个端口。</li>
+<li><strong>容器起来就退出</strong>：<code>docker logs 容器名</code> 看日志（多数是应用启动报错）。注意：容器里<strong>主进程退出 = 容器退出</strong>，所以前台程序要有，别写个后台命令就结束。</li>
+<li><strong>改了代码不生效</strong>：镜像没重新 build（<code>docker build</code> 后要重新 <code>run</code> 新容器）。容器用的是"构建时的快照"，不是实时文件。</li>
+<li><strong><code>permission denied</code> 访问挂载目录</strong>：容器内用户和宿主机文件属主不匹配 → 调整文件权限或容器运行用户。</li>
+</ol>
+<h3 id="练习">练习</h3>
+<ol>
+<li>跑起 nginx 容器，进容器里改首页</li>
+<li>写一个自己的 Python Flask 应用 Dockerfile，构建并运行</li>
+<li>用数据卷让容器数据在删除容器后仍然保留（验证一下：删容器→立新容器挂同一卷→数据还在）</li>
+<li>用 Compose 拉起 nginx + mysql 两件套</li>
+<li>把镜像打上标签推到 Docker Hub，从另一个"终端"拉下来运行</li>
+<li>（挑战）写多阶段构建的 Go 程序镜像，对比体积</li>
+</ol>
+<h3 id="自检清单">自检清单</h3>
+<ul>
+<li>[ ] 我能给完全不懂的人讲清"容器 vs 虚拟机"</li>
+<li>[ ] 我会写 Dockerfile（8 个核心指令都用过）</li>
+<li>[ ] 我理解 <code>-p 8080:80</code>、<code>-v</code>、<code>--network</code> 三个参数</li>
+<li>[ ] 我用过数据卷并理解"容器删了数据为什么还在/不在"</li>
+<li>[ ] 我用 Compose 拉起过完整栈</li>
+<li>[ ] 我推拉过镜像仓库</li>
+</ul>
+<h3 id="对应真题">对应真题</h3>
+<ul>
+<li>中国国赛"容器云"模块（40% 权重）：装 Docker+K8s、镜像构建、容器编排——本章是它的第一半地基</li>
+<li>韩国赛：<code>make images</code>（构建推 ECR）、Docker 基础镜像是全流程起点</li>
+<li>世界赛：现代模块中的容器化部署（Module C 云架构常见）</li>
+</ul>
+</div>
+</body>
+</html>

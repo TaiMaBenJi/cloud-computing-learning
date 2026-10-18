@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 0 章 · 开始之前——写给&quot;完全不懂&quot;的你 - 知识公社</title>
+<meta name="description" content="第 0 章 · 开始之前——写给&quot;完全不懂&quot;的你：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-0-章-开始之前-写给-完全不懂-的你">第 0 章 · 开始之前——写给"完全不懂"的你</h1>
+<blockquote>这一章不教技术。它的任务只有一个：<strong>让你知道这一切到底是什么，以及你明天该做什么。</strong></blockquote>
+<blockquote>请从头到尾读完（大概 20 分钟）。读完再决定要不要学——但我觉得你会想学的。</blockquote>
+<hr>
+<h2 id="0-1-先说三个事实-给你吃定心丸">0.1 先说三个事实，给你吃定心丸</h2>
+<p><strong>事实一：你不需要会电脑，就能学会云计算。</strong> 全世界所有的云计算工程师，第一天都和你一样——不知道什么叫"服务器"，分不清"内存"和"硬盘"，看到黑底白字的屏幕就发慌。区别只有一个：他们开始学了，然后没有停。</p>
+<p><strong>事实二：这不是智商问题，是"信息差"问题。</strong> 这套教程存在的意义，就是把所有"圈内人觉得很显然、但对新手如同天书"的信息，全部写出来。你不需要任何天赋，只需要：</p>
+<ul>
+<li>一台能用的电脑</li>
+<li>每天 2 小时</li>
+<li>不放弃的耐心</li>
+</ul>
+<p><strong>事实三：你的手机就是这本书最好的比喻。</strong> 你每天刷的抖音、点外卖、扫码支付——这些 App 背后，有成千上万台电脑 24 小时在运行。那些电脑放在专门的机房里，由"云计算工程师"搭建和维护。<strong>这个职业，就是你要学的方向。</strong> 你手机里的每一个 App 都依赖它，所以它不会过时。</p>
+<hr>
+<h2 id="0-2-几个名词-用人话解释-读完这节-你已经超过-90-的小白">0.2 几个名词，用人话解释（读完这节，你已经超过 90% 的小白）</h2>
+<h3 id="什么是-服务器">什么是"服务器"？</h3>
+<p>服务器的本质就是<strong>一台电脑</strong>。和你家的电脑没有本质区别——同样的 CPU、内存、硬盘。区别在用途：</p>
+<ul>
+<li>你家电脑：你一个人用，看剧、打游戏。</li>
+<li>服务器：很多人在网上同时用（比如同时几万人在刷同一个 App），所以它要 24 小时开机、不能随便死机。</li>
+</ul>
+<p>你在机房看到的就是一排排铁架子（叫"机柜"），里面插着一台台扁扁的电脑。没有显示器，没有键盘——因为都通过网络远程控制。</p>
+<h3 id="什么是-操作系统-什么是-linux">什么是"操作系统"？什么是 Linux？</h3>
+<p>操作系统就是你手机里的"安卓"或"iOS"，电脑里的"Windows"。它管着这台机器的所有硬件，让上面能跑软件。</p>
+<p><strong>Linux 就是服务器世界里用的操作系统</strong>（就像安卓是手机世界的）。</p>
+<ul>
+<li>为什么服务器都用 Linux？因为它免费、稳定、省资源、安全，全世界的人都能改它。</li>
+<li>世界上超过 90% 的服务器跑着 Linux。你刷的每一个 App、看的每一个网站，背后几乎一定有一排排跑 Linux 的服务器。</li>
+<li>Linux 的用法和你熟悉的 Windows 有很大不同：它没有鼠标点点点为主，而是<strong>敲命令</strong>。别怕——命令只是"用打字代替点鼠标"，学会之后效率是点鼠标的十倍。</li>
+</ul>
+<h3 id="什么是-云-云计算-又是什么">什么是"云"？"云计算"又是什么？</h3>
+<p>想象你要开一家餐厅：</p>
+<ul>
+<li><strong>老办法（自建）</strong>：自己买地、盖楼、买灶台、雇人。前期花几百万，生意不好灶台就空着。</li>
+<li><strong>新办法（上云）</strong>：租一个"共享大厨房"。要几个灶台租几个，生意好就多租，生意差就退掉，按月付租金，炉子坏了有人替你修。</li>
+</ul>
+<p><strong>"云"就是别人的、可以按需租用的大机房。</strong> 背后的公司是：亚马逊 AWS、微软 Azure、阿里云、华为云、谷歌云…… <strong>"云计算"就是：把公司的系统搭在租来的机房里，并且让它：运行快、不宕机、安全、还省钱。</strong></p>
+<p>你平时听到的所有高大上的词（"上云""数字化转型""云原生"），归根结底都是这一件事。</p>
+<h3 id="什么是-世界技能大赛-跟这个有什么关系">什么是"世界技能大赛"？跟这个有什么关系？</h3>
+<p>世界技能大赛（WorldSkills）是<strong>职业技能界的奥运会</strong>，两年一届，各国派最顶尖的年轻技术工人比拼手艺，比焊接、比美发、比烹饪，也比"云计算"。</p>
+<ul>
+<li>云计算这个项目（编号 Skill 39）比的就是：给你一套需求，几小时内你要在 AWS 上把系统搭出来——包括 Linux 服务器、Windows 服务器、网络、数据库、容器、安全、性能优化。</li>
+<li>2024 年在法国里昂的冠军是中国人（黄佳杰）。<strong>2026 年下一届在上海举办</strong>——就在你的国家比。</li>
+<li>各省、各学校都有选拔赛。就算不参赛，学到的本事也足够找一份很好的工作（云运维/DevOps/云架构师，大城市月薪 2 万起，有经验的三五万很常见）。</li>
+</ul>
+<h3 id="什么是-aws-为什么总提它">什么是 AWS？为什么总提它？</h3>
+<p>AWS = 亚马逊云，是全世界最大、最早做云的公司（对，就是那个卖书的亚马逊）。世界技能大赛的云计算项目由 AWS 提供比赛平台，所以教程会以 AWS 为主线来教。学会 AWS 之后，阿里云、华为云、腾讯云（国内市场份额最大）的逻辑都是相通的，可以一通百通。</p>
+<hr>
+<h2 id="0-3-学之前-准备这几样东西">0.3 学之前，准备这几样东西</h2>
+<h3 id="①-一台电脑-最重要的投资">① 一台电脑（最重要的投资）</h3>
+<ul>
+<li><strong>最低要求</strong>：任何还能开机的电脑——Windows 或 Mac 都行。内存 8GB 最好，4GB 勉强能开始（后面有云方案）。</li>
+<li><strong>如果电脑很旧/没有电脑</strong>：别放弃。有两条路：</li>
+</ul>
+<ol>
+<li><strong>用云服务器练手</strong>：租一台最便宜的云服务器（学生优惠几十块甚至十几块一个月，比如阿里云/腾讯云的学生机），用你的手机或旧电脑连上去练习。本教程第 1 章会教你。</li>
+<li><strong>去网吧/学校机房</strong>：教程里所有操作在普通电脑上都能做，不挑配置。</li>
+</ol>
+<h3 id="②-网络">② 网络</h3>
+<p>能上网就行。查资料、连服务器、注册云账号都需要网络。手机上也能看教程（你正在看）。</p>
+<h3 id="③-三个账号-现在不用注册-学到再注册也行">③ 三个账号（现在不用注册，学到再注册也行）</h3>
+<ul>
+<li>一个邮箱（收验证码用）</li>
+<li>AWS 账号（第 5 章教你怎么注册，选海外区）</li>
+<li>国内云账号（阿里云/腾讯云/华为云三选一即可）</li>
+</ul>
+<h3 id="④-一个心态设定-比什么都重要">④ 一个心态设定（比什么都重要）</h3>
+<ul>
+<li><strong>允许自己犯错</strong>。这个领域所有的技能都是在"弄坏再修好"中学会的。把命令敲错了、把文件删了——都不是事故，是练习。</li>
+<li><strong>不要只看不动手</strong>。看教程 10 遍，不如自己敲 1 遍。本教程每节都设计了"动手环节"，请务必照着做。</li>
+<li><strong>不要追求一次看懂</strong>。第一遍看不懂的概念，先抄一遍、跑一遍，第二遍自然就懂了。</li>
+</ul>
+<hr>
+<h2 id="0-4-这套教程怎么用-重要">0.4 这套教程怎么用（重要！）</h2>
+<h3 id="学习结构">学习结构</h3>
+<p>整套教程按"从零到能打比赛"分阶段，每一章都是：</p>
+<pre><code>第 N 章
+├── ① 这章学什么、学完能干嘛
+├── ② 概念讲解（大白话 + 比喻，看不懂技术先看比喻）
+├── ③ 动手环节（一步一命令，一步一截图式说明）
+├── ④ 你应该看到什么（正确输出示例）
+├── ⑤ 出错了怎么办（新手最常踩的 5 个坑）
+├── ⑥ 练习 + 参考答案
+├── ⑦ 自我检验（全对才能进下一节）
+└── ⑧ 关联真题（这节学的东西，世界赛/国赛哪道题在考）</code></pre>
+<h3 id="学习节奏建议">学习节奏建议</h3>
+<ul>
+<li><strong>每天 2 小时</strong>：1 小时看+跟着做，1 小时自己练。</li>
+<li><strong>不要跳章</strong>。每一章都依赖前一章。跳着学 = 盖楼不打地基。</li>
+<li><strong>一章学完做自测</strong>，80 分以下重学那章。</li>
+</ul>
+<h3 id="需要多久">需要多久？</h3>
+<ul>
+<li>从零到"能自己搭一台网站服务器"：约 3 个月（每天 2 小时）</li>
+<li>从零到"能参加省级选拔赛"：约 6-12 个月</li>
+<li>从零到"能冲击世界赛水平"：2-3 年（这正是各国国家队选手的成长时间）</li>
+</ul>
+<p><strong>不要急着算时间。每天比昨天多会一个命令，你就赢了。</strong></p>
+<hr>
+<h2 id="0-5-常见问题-新手一定会问的">0.5 常见问题（新手一定会问的）</h2>
+<p><strong>Q：我英语不好能学吗？</strong> 能。本教程全中文，所有英文术语第一次出现都给中文解释。但建议你顺便背一点常用英文单词（100 个左右就够用），因为比赛环境的界面是英文的。教程里会标注哪些单词必须认识。</p>
+<p><strong>Q：数学不好能学吗？</strong> 能。云计算里用到的数学不超过初中水平（主要是二进制、IP 地址的加减法），教程里会重新教。</p>
+<p><strong>Q：多大年龄能学？</strong> 世赛选手要求 22 岁以下（云计算项目），但<strong>学习和从业没有任何年龄限制</strong>。三四十岁转行做云计算的比比皆是。</p>
+<p><strong>Q：要花很多钱吗？</strong></p>
+<ul>
+<li>学习本身：几乎不花钱（教程、资料都免费）</li>
+<li>练习环境：本地虚拟机免费；想练真云，一个月准备 50-200 元预算即可（有免费额度和学生优惠）</li>
+<li>千万不要一上来就报几千几万的培训班。跟着这套教程走，配合免费视频，足够了。</li>
+</ul>
+<p><strong>Q：手机能学吗？</strong> 看教程、看视频可以。但敲命令练习需要电脑（手机没有键盘，也跑不了虚拟机）。实在只有手机——先去借/弄一台电脑，这是唯一门槛。</p>
+<p><strong>Q：学出来能干嘛？工资多少？</strong> 云运维工程师、云计算工程师、DevOps 工程师、云架构师、SRE……都是对口岗位。一线城市初级月薪 8-15K，1-3 年经验 15-30K，资深/架构师 40K+。竞赛获奖选手更是各地抢人（技能落户、编制、奖金都有政策）。</p>
+<hr>
+<h2 id="0-6-现在-给自己-5-分钟">0.6 现在，给自己 5 分钟</h2>
+<p>打开手机备忘录，写下三行字：</p>
+<ol>
+<li>我为什么想学云计算：________________（比如："想找一份工资高的工作"）</li>
+<li>我每天能投入的时间：________________（比如："晚上 8 点到 10 点"）</li>
+<li>学成以后我要：________________（比如："参加省赛，或者找一份云运维工作"）</li>
+</ol>
+<p>写完保存。以后每个坚持不下去的夜晚，翻出来看一眼。</p>
+<p><strong>准备好了？翻到第 1 章。我们从"什么是电脑"开始，一步一步来。</strong></p>
+</div>
+</body>
+</html>

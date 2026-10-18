@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第20章 · 锐捷云平台基础 —— 试题 A 实战 - 知识公社</title>
+<meta name="description" content="第20章 · 锐捷云平台基础 —— 试题 A 实战：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第20章-锐捷云平台基础-试题-a-实战">第20章 · 锐捷云平台基础 —— 试题 A 实战</h1>
+<blockquote><strong>适用</strong>：B7 实训中心机房管理 ·《锐捷云平台基础》试题 A（实操考试）</blockquote>
+<blockquote><strong>一句话目标</strong>：在锐捷云平台走通「制作镜像 → 新建教室 → 师生互动验证」，<strong>参数一个不错、后台 0 报错</strong>，拿满 100 分。</blockquote>
+<blockquote><strong>模拟自测</strong>：读完本章，去「考试中心 → 章节测验 → 第20章 · 锐捷云平台基础」做 15 题模拟（自动判分）。</blockquote>
+<hr>
+<h2 id="0-先看懂规则-判分结构">0. 先看懂规则（判分结构）</h2>
+<div class="tw"><table><thead><tr><th>环节</th><th>分值</th><th>要点</th></tr></thead><tbody>
+<tr><td>镜像制作</td><td><strong>60 分</strong></td><td>名称、系统版本、4/4/60、账户 adminjf、装 VS、无数据盘</td></tr>
+<tr><td>教室要求</td><td><strong>20 分</strong></td><td>教室名、教师机主机名、座位名前缀</td></tr>
+<tr><td>机房 IP 部署</td><td><strong>10 分</strong></td><td>教师端 .100 / 学生端 .101 起</td></tr>
+<tr><td>师生信息交互</td><td><strong>10 分</strong></td><td>文件分发 + 屏幕广播，两项都要通</td></tr>
+</tbody></table></div>
+<p><strong>三条铁的规则</strong></p>
+<ol>
+<li><strong>报错最贵</strong>：锐捷云后台报错 ≥2 次，每次 <strong>-10 分</strong>。稳，比快重要。</li>
+<li><strong>下发不计时</strong>：镜像批量下发学生机的时间<strong>不算</strong>考试时间——不用抢，但更不许中途强操作。</li>
+<li><strong>最终解释权归统计员</strong>（尹占熙 / 丁秋林 / 鞠雨航）：拿不准 → 先问，<strong>问不扣分，报错才扣分</strong>。</li>
+</ol>
+<hr>
+<h2 id="1-硬参数速查卡-照着填-一个都不能错">1. 硬参数速查卡（照着填，一个都不能错）</h2>
+<div class="tw"><table><thead><tr><th>项目</th><th>要求值</th><th>备注</th></tr></thead><tbody>
+<tr><td>镜像名称</td><td><strong>你的汉语姓名</strong></td><td>例：张三</td></tr>
+<tr><td>操作系统</td><td><strong>Windows 10 22H2 专业版</strong></td><td>版本 + 专业版，严格按要求</td></tr>
+<tr><td>处理器 / 内存 / 系统盘</td><td><strong>4 / 4 / 60</strong></td><td>合理分配不超标</td></tr>
+<tr><td>操作系统名（账户）</td><td><strong>adminjf</strong></td><td>建镜像时按平台字段照填</td></tr>
+<tr><td>必装程序</td><td><strong>VS</strong></td><td>用考场提供的安装包 / 软件库</td></tr>
+<tr><td>教师端磁盘</td><td><strong>无数据盘</strong></td><td>不加</td></tr>
+<tr><td>学生端磁盘</td><td><strong>无数据盘 + 无个性化</strong></td><td>每次还原</td></tr>
+<tr><td>教室名称</td><td><strong>你的汉语姓名</strong></td><td>与镜像名同规则</td></tr>
+<tr><td>网络 IP（第 4 位）</td><td>教师 <strong>100</strong> / 学生 <strong>101 起</strong></td><td>逐台 +1 顺延</td></tr>
+<tr><td>教师机主机名</td><td><strong>gyjsjs</strong></td><td>一字不差</td></tr>
+<tr><td>座位名前缀</td><td><strong>gyjszw-</strong></td><td>带半角连字符，别漏</td></tr>
+<tr><td>验收</td><td><strong>文件分发 + 屏幕广播</strong></td><td>两项都通才算过</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-阶段一-制作镜像-60-分">2. 阶段一 · 制作镜像（60 分）</h2>
+<ol>
+<li>教师账号登录<strong>锐捷云管理平台</strong> → 进「镜像管理」→ 新建 / 制作镜像。</li>
+<li>按速查卡填：名称 = 汉语姓名；系统 = Windows 10 22H2 专业版；处理器 4、内存 4G、系统盘 60G；账户 <strong>adminjf</strong>。</li>
+<p>🎯 <em>为什么强调"不超标"：试卷原文写明"做到资源合理分配不超标"——多给配置同样算错。</em></p>
+<li>打开镜像控制台（母机），用 <strong>adminjf</strong> 登录 → 安装 <strong>VS</strong> → 按考题要求把数据 / 文件 / 程序部署到位。</li>
+<li>关机 → 提交 / 完成镜像 → 等状态变「可用」。</li>
+<p>🚨 提交过程中<strong>不强关、不重复提交</strong>——这里是后台报错高发区。</p>
+</ol>
+<h2 id="3-阶段二-新建教室-20-10-分">3. 阶段二 · 新建教室（20 + 10 分）</h2>
+<ol>
+<li>「教室管理」→ 新增教室：教室名称 = 汉语姓名；选择刚做好的镜像；座位按考场实际（教师位 1 个）。</li>
+<li><strong>网络 / IP（10 分）</strong>：网段用考场资源池给出的（前三段别动）；<strong>教师端第 4 位 = 100</strong>；<strong>学生端 101 起逐台 +1</strong>。</li>
+<p>🎯 <em>"学生端：教师+1 起" = 第 1 台学生 .101、第 2 台 .102……不是都用 .101。</em></p>
+<li><strong>命名</strong>：教师机主机名 <strong>gyjsjs</strong>；座位名前缀 <strong>gyjszw-</strong>（半角连字符，别漏也别用中文破折号）。</li>
+<li><strong>桌面策略</strong>：教师端无数据盘；学生端无数据盘 + 无个性化（还原模式）。</li>
+<li>保存 → 执行「<strong>镜像批量下发</strong>学生机」→ 等全部「已完成」。</li>
+<p>⏳ 下发不计入考试时间；但<strong>下发没完成前，不碰终端、不关机、不重启</strong>。</p>
+</ol>
+<h2 id="4-阶段三-师生互动验证-10-分">4. 阶段三 · 师生互动验证（10 分）</h2>
+<ol>
+<li>开机<strong>教师机 + 至少 2 台学生机</strong>，核对：学生机 IP = …101 / …102，教师机主机名 gyjsjs。</li>
+<li>打开教学互动软件，做两项：</li>
+</ol>
+<ul>
+<li><strong>文件分发</strong>：发个小文件（txt 即可）→ 学生机收到并打开 ✔</li>
+<li><strong>屏幕广播</strong>：开启广播 → 学生机画面同步显示 ✔</li>
+</ul>
+<ol>
+<li>两项都通过 → 举手请统计员验收。</li>
+</ol>
+<h2 id="5-扣分雷区-背下来">5. 扣分雷区（背下来）</h2>
+<ul>
+<li>❌ 平台在转圈 / 进度条没走完就点下一步、刷新页面、关终端</li>
+<li>❌ 多给内存、加数据盘、装无关软件（资源超标）</li>
+<li>❌ 下发 / 部署途中强操作终端</li>
+<li>❌ 没做出可用镜像就先建教室（必报错）</li>
+<li>✅ 拿不准 → 问统计员；✅ 每一步等状态变绿再走</li>
+</ul>
+<h2 id="6-交卷前-10-秒自查">6. 交卷前 10 秒自查</h2>
+<ul>
+<li>[ ] 镜像名 = 姓名；4/4/60；Win10 22H2 专业版；adminjf；VS 已装</li>
+<li>[ ] 教师无数据盘；学生无数据盘 + 无个性化</li>
+<li>[ ] 教室名 = 姓名；教师 .100 / 学生 .101 起；gyjsjs；gyjszw-</li>
+<li>[ ] 文件分发 ✔ 屏幕广播 ✔</li>
+<li>[ ] 全程无后台报错</li>
+</ul>
+<h2 id="7-记忆口诀">7. 记忆口诀</h2>
+<blockquote><strong>先镜像后教室；一百起步、逐台 +1；主机 gyjsjs；前缀带杠 gyjszw-；互动两件套：分发 + 广播；报错最贵、拿不准就问。</strong></blockquote>
+<hr>
+<p><em>本章整理自 B7 实训中心机房管理《锐捷云平台基础》试题 A 原件；平台菜单位置因版本略有差异，认准「镜像 / 教室 / 终端」三类入口。</em></p>
+</div>
+</body>
+</html>

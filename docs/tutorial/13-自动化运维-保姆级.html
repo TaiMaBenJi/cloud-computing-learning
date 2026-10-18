@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 13 章 · 自动化运维（Ansible + Terraform：指挥千军万马） - 知识公社</title>
+<meta name="description" content="第 13 章 · 自动化运维（Ansible + Terraform：指挥千军万马）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-13-章-自动化运维-ansible-terraform-指挥千军万马">第 13 章 · 自动化运维（Ansible + Terraform：指挥千军万马）</h1>
+<blockquote>一台机器用手操作，十台机器用脚本，一百台机器用工具。</blockquote>
+<blockquote>本章学两大神器：<strong>Ansible</strong>（管"机器里装什么"）+ <strong>Terraform</strong>（管"云上有哪些机器"）。韩国赛全套题解都是 Terraform；世界赛 Module A 有 Ansible 评分点。</blockquote>
+<blockquote>预计学习时间：3 周。</blockquote>
+<hr>
+<h2 id="13-1-分工先搞清楚-一张图记住">13.1 分工先搞清楚（一张图记住）</h2>
+<pre><code>Terraform  ──创建/销毁──▶  云资源（VPC、EC2、数据库、负载均衡…）
+                             │
+Ansible    ──配置/部署──▶  这些机器内部（装软件、传文件、启服务…）</code></pre>
+<ul>
+<li><strong>Terraform = 装修队前期</strong>：盖房子、通水电（把资源"造"出来）</li>
+<li><strong>Ansible = 搬家公司+管家</strong>：往房子里布置家具、日常维护（把机器"配"起来）</li>
+</ul>
+<hr>
+<h2 id="13-2-ansible-实战">13.2 Ansible 实战</h2>
+<h3 id="13-2-1-核心概念-三个词起步">13.2.1 核心概念（三个词起步）</h3>
+<div class="tw"><table><thead><tr><th>词</th><th>是什么</th><th>比喻</th></tr></thead><tbody>
+<tr><td><strong>inventory</strong></td><td>被管理机器的清单</td><td>员工花名册</td></tr>
+<tr><td><strong>playbook</strong></td><td>一份"要做什么"的剧本（YAML）</td><td>给员工的任务书</td></tr>
+<tr><td><strong>module</strong></td><td>干具体活的工具箱（apt、copy、service…）</td><td>各种工具</td></tr>
+</tbody></table></div>
+<p><strong>特点：无 Agent</strong>——不用在目标机器装任何东西，靠 SSH 就能管（这也是它火的原因）。</p>
+<h3 id="13-2-2-安装与第一次战斗">13.2.2 安装与第一次战斗</h3>
+<pre><code>sudo apt install -y ansible
+ansible --version
+
+# 准备一个&quot;花名册&quot;（先用本机练）
+mkdir -p ~/ansible-lab &amp;&amp; cd ~/ansible-lab
+nano inventory.ini</code></pre>
+<pre><code>[web]
+localhost ansible_connection=local     # 本机练手（真实场景写对方 IP）
+
+[web:vars]
+ansible_user=student</code></pre>
+<p><strong>第一次"ping"（不是网络 ping，是"Ansible 能不能连上你"的握手）</strong>：</p>
+<pre><code>ansible -i inventory.ini web -m ping
+# → localhost | SUCCESS =&gt; {&quot;changed&quot;: false, &quot;ping&quot;: &quot;pong&quot;}</code></pre>
+<p><code>SUCCESS</code> = 连上了。<strong>世界赛 Module A 的 A15-01 评分点就是"ansible ping 通过"——你已经完成了一个评分点。</strong></p>
+<h3 id="13-2-3-playbook-把操作写成剧本">13.2.3 Playbook：把操作写成剧本</h3>
+<pre><code>nano site.yml</code></pre>
+<pre><code>---
+- name: 配置 Web 服务器          # 剧本名（给人看的）
+  hosts: web                     # 对花名册里的哪组机器执行
+  become: true                   # 相当于 sudo（提权）
+  tasks:                         # 任务列表（从上到下执行）
+
+    - name: 安装 nginx           # 每个任务有 name（执行时打印出来）
+      apt:
+        name: nginx
+        state: present           # present=安装 latest=装最新版
+
+    - name: 部署首页
+      copy:
+        content: &quot;&lt;h1&gt;Ansible 部署的页面&lt;/h1&gt;\n&quot;
+        dest: /var/www/html/index.html
+
+    - name: 确保 nginx 运行并自启
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: 防火墙放行 80
+      ufw:
+        rule: allow
+        port: &quot;80&quot;</code></pre>
+<p>运行：</p>
+<pre><code>ansible-playbook -i inventory.ini site.yml</code></pre>
+<p>输出每一行 <code>TASK [...]</code> 就是执行过程，最后有统计：</p>
+<pre><code>PLAY RECAP
+localhost : ok=4 changed=3 unreachable=0 failed=0</code></pre>
+<p><strong>ok=检查了 4 项，changed=真正改变了 3 项，failed=0。</strong></p>
+<p><strong>再运行一次</strong>——注意！changed 变成 0 了：</p>
+<pre><code>ansible-playbook -i inventory.ini site.yml
+# changed=0, ok=4</code></pre>
+<p><strong>这就是"幂等性"（Idempotent）</strong>：同一个剧本跑一万遍，结果都一样，不会重复装错。<strong>这是配置管理的灵魂——写"目标状态"而不是"操作步骤"。</strong>（对应：世界赛 A15 的第二次运行不应该有变化。）</p>
+<h3 id="13-2-4-变量与模板-让剧本通用化">13.2.4 变量与模板（让剧本通用化）</h3>
+<pre><code>mkdir -p group_vars
+nano group_vars/web.yml</code></pre>
+<pre><code>site_title: &quot;我的公司网站&quot;
+site_port: 80</code></pre>
+<p>用模板文件（<code>templates/index.html.j2</code>）：</p>
+<pre><code>&lt;h1&gt;{{ site_title }}&lt;/h1&gt;
+&lt;p&gt;服务端口: {{ site_port }}&lt;/p&gt;</code></pre>
+<p>剧本里：</p>
+<pre><code>    - name: 用模板部署首页
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/html/index.html</code></pre>
+<p><code>{{ 变量 }}</code> 会被替换。<strong>这就是"一套剧本，多环境复用"的秘密。</strong></p>
+<h3 id="13-2-5-批量管理多台机器-真正的用武之地">13.2.5 批量管理多台机器（真正的用武之地）</h3>
+<p>在真实场景（比如第 12 章的 EC2 集群）：</p>
+<pre><code>[web]
+10.0.1.10
+10.0.1.11
+10.0.2.10
+
+[db]
+10.0.11.10</code></pre>
+<pre><code>ansible -i inventory.ini all -m ping          # 一次 ping 所有机器
+ansible-playbook -i inventory.ini site.yml    # 一次配置全部 web</code></pre>
+<p><strong>一条命令，三台服务器同时装好 nginx——这就是自动化的威力。</strong></p>
+<hr>
+<h2 id="13-3-terraform-实战">13.3 Terraform 实战</h2>
+<h3 id="13-3-1-核心概念-四个词">13.3.1 核心概念（四个词）</h3>
+<div class="tw"><table><thead><tr><th>词</th><th>是什么</th></tr></thead><tbody>
+<tr><td><strong>provider</strong></td><td>对接哪个平台（aws/azurerm/google…）</td></tr>
+<tr><td><strong>resource</strong></td><td>要创建的资源（"我要一台 EC2"）</td></tr>
+<tr><td><strong>state</strong></td><td>记录"已经建了什么"的账本（重要！）</td></tr>
+<tr><td><strong>plan/apply</strong></td><td>先看"要变什么"，再执行</td></tr>
+</tbody></table></div>
+<p><strong>核心思想：把云资源写成代码（IaC，Infrastructure as Code）</strong>。好处：可版本管理、可复用、可 review、可一键重建。</p>
+<h3 id="13-3-2-安装与第一个项目">13.3.2 安装与第一个项目</h3>
+<pre><code># Ubuntu 安装（用官方源）
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo &quot;deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main&quot; | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update &amp;&amp; sudo apt install -y terraform
+terraform -version</code></pre>
+<pre><code>mkdir -p ~/tf-lab/s3 &amp;&amp; cd ~/tf-lab/s3
+nano main.tf</code></pre>
+<pre><code># ① 声明用 AWS provider
+terraform {
+  required_providers {
+    aws = {
+      source  = &quot;hashicorp/aws&quot;
+      version = &quot;~&gt; 5.0&quot;
+    }
+  }
+}
+
+provider &quot;aws&quot; {
+  region = &quot;us-west-2&quot;        # 换成你的区域
+}
+
+# ② 定义一个资源：S3 桶
+resource &quot;aws_s3_bucket&quot; &quot;demo&quot; {
+  bucket = &quot;my-tf-demo-2026-xyz123&quot;   # 全球唯一名字（加上你的随机后缀）
+  tags = {
+    Name    = &quot;terraform-demo&quot;
+    Owner   = &quot;student&quot;
+  }
+}</code></pre>
+<p><strong>工作流四步走（背下来）</strong>：</p>
+<pre><code>terraform init      # ① 初始化：下载 provider 插件（第一次必做）
+terraform plan      # ② 预演：显示&quot;将创建 1 个资源&quot;（绿色 + 号）
+terraform apply     # ③ 执行：输入 yes 确认 → 创建！
+terraform destroy   # ④ 销毁：练习完删掉（省钱）</code></pre>
+<p><strong>看 plan 的输出</strong>——它会逐条列出"哪些要建（+）、要改（~）、要删（-）"。<strong>养成"先 plan 再 apply"的铁律</strong>（就像"先 nginx -t 再 reload"）。</p>
+<h3 id="13-3-3-完整的-ec2-安全组示例">13.3.3 完整的 EC2 + 安全组示例</h3>
+<pre><code>resource &quot;aws_security_group&quot; &quot;web&quot; {
+  name        = &quot;web-sg&quot;
+  description = &quot;allow http and ssh&quot;
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = &quot;tcp&quot;
+    cidr_blocks = [&quot;0.0.0.0/0&quot;]     # 学习期；生产建议只放你的 IP/32
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = &quot;tcp&quot;
+    cidr_blocks = [&quot;0.0.0.0/0&quot;]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = &quot;-1&quot;
+    cidr_blocks = [&quot;0.0.0.0/0&quot;]
+  }
+}
+
+resource &quot;aws_instance&quot; &quot;web&quot; {
+  ami                    = &quot;ami-xxxxxxxx&quot;    # 换成你区域里的 Ubuntu AMI ID
+  instance_type          = &quot;t3.micro&quot;
+  key_name               = &quot;mykey&quot;
+  vpc_security_group_ids = [aws_security_group.web.id]
+
+  user_data = &lt;&lt;-EOF
+    #!/bin/bash
+    apt update &amp;&amp; apt install -y nginx
+    echo &quot;Hello from Terraform&quot; &gt; /var/www/html/index.html
+  EOF
+
+  tags = { Name = &quot;tf-web&quot; }
+}
+
+output &quot;public_ip&quot; {                 # 输出公网 IP（apply 后显示）
+  value = aws_instance.web.public_ip
+}</code></pre>
+<pre><code>terraform apply          # 全自动：建安全组 → 建 EC2 → 装 nginx
+# output 里给你 IP → 浏览器访问 → Hello from Terraform
+terraform destroy        # 全部清理（资源名字都记在 state 里，删得干干净净）</code></pre>
+<h3 id="13-3-4-变量-模块-远程状态-工程化三件套">13.3.4 变量、模块、远程状态（工程化三件套）</h3>
+<p><strong>变量（variables.tf）</strong>：</p>
+<pre><code>variable &quot;region&quot; {
+  default = &quot;us-west-2&quot;
+}
+variable &quot;instance_type&quot; {
+  default = &quot;t3.micro&quot;
+}</code></pre>
+<p>使用：<code>instance_type = var.instance_type</code>；命令行覆盖：<code>terraform apply -var="instance_type=t3.small"</code>。</p>
+<p><strong>模块（modules/）</strong>：把一堆资源打包成可复用的"乐高块"：</p>
+<pre><code>module &quot;web_cluster&quot; {
+  source        = &quot;./modules/web&quot;
+  instance_count = 3
+}</code></pre>
+<p>韩国赛题解里 <code>modules/bastion</code>、<code>modules/vpc</code> 就是这个结构。</p>
+<p><strong>远程状态（团队必需）</strong>：state 默认存在本地文件，多人协作会打架。生产放 S3：</p>
+<pre><code>terraform {
+  backend &quot;s3&quot; {
+    bucket = &quot;my-tf-state-bucket&quot;
+    key    = &quot;prod/terraform.tfstate&quot;
+    region = &quot;us-west-2&quot;
+  }
+}</code></pre>
+<h3 id="13-3-5-一些救命命令">13.3.5 一些救命命令</h3>
+<pre><code>terraform fmt               # 格式化代码（对齐缩进，提交前跑）
+terraform validate          # 语法检查
+terraform state list        # 看当前管理了哪些资源
+terraform output            # 看输出值
+terraform plan -destroy     # 预览&quot;销毁会删什么&quot;</code></pre>
+<hr>
+<h2 id="13-4-ci-cd-初见-让代码-自动上线">13.4 CI/CD 初见：让代码"自动上线"</h2>
+<p><strong>CI（持续集成）</strong>= 代码一提交，自动测试/构建；<strong>CD（持续部署）</strong>= 构建产物自动发布到服务器。</p>
+<h3 id="13-4-1-用-github-actions-写第一条流水线">13.4.1 用 GitHub Actions 写第一条流水线</h3>
+<p>仓库里建 <code>.github/workflows/deploy.yml</code>：</p>
+<pre><code>name: Deploy Site
+on:
+  push:
+    branches: [main]          # 一推到 main 分支就触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 部署到服务器
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}        # 在仓库 Secrets 里配置
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/www/mysite
+            git pull
+            sudo systemctl reload nginx</code></pre>
+<p><strong>流程</strong>：你 push 代码 → GitHub 的机器自动 SSH 到你的服务器 → 拉取新代码 → 重载服务。<strong>一句话：点一下提交，网站自动更新。</strong></p>
+<h3 id="13-4-2-与比赛的关系">13.4.2 与比赛的关系</h3>
+<ul>
+<li>韩国赛：<code>make images</code>（构建镜像 → 推 ECR → 部署）就是 CI/CD 的本地版；进阶题直接用 GitHub Actions/CodePipeline</li>
+<li>世界赛：Ansible 自动配置（A15）+ 各类脚本化部署</li>
+<li><strong>记住分层</strong>：CI 管"构建产物"，CD/GitOps 管"部署到位"（第 14 章会提 GitOps 的 ArgoCD）</li>
+</ul>
+<hr>
+<h2 id="13-5-综合实战-一条龙-从零建站">13.5 综合实战：一条龙"从零建站"</h2>
+<p><strong>用 Terraform + Ansible 完整交付：</strong></p>
+<pre><code># 1. Terraform：建 VPC + 2 台 EC2 + 安全组
+cd ~/tf-lab/full &amp;&amp; terraform apply
+# 2. 生成 Ansible 花名册（把输出的 IP 填进去）
+terraform output -json &gt; hosts.json
+# 3. Ansible：对两台机器一键配置
+ansible-playbook -i inventory.ini site.yml
+# 4. 验证：curl 两台机器的 IP，都是配置好的页面
+# 5. 销毁
+terraform destroy</code></pre>
+<p><strong>恭喜——你已经完成了现代运维的完整闭环：代码建资源 → 代码配机器 → 验证 → 销毁。</strong> 这就是 IaC 的全部哲学。</p>
+<hr>
+<h2 id="13-6-自检清单">13.6 自检清单</h2>
+<ul>
+<li>[ ] 我能解释 Ansible 的 inventory/playbook/module 三件套，理解幂等性</li>
+<li>[ ] 我写过含变量和模板的 playbook，跑两遍 changed=0</li>
+<li>[ ] 我理解 Terraform 的 provider/resource/state，会 init/plan/apply/destroy 四连</li>
+<li>[ ] 我用 Terraform 建过真实资源（S3/EC2）并成功销毁</li>
+<li>[ ] 我知道先说"plan 再 apply"、先"备份再改"的运维铁律</li>
+<li>[ ] 我见过 CI/CD 流水线（GitHub Actions）并理解它解决什么问题</li>
+</ul>
+<h3 id="对应真题">对应真题</h3>
+<ul>
+<li>世界赛 Module A：A15 评分点（ansible ping + 部署验证）——本教程 13.2 节就是它的完整训练</li>
+<li>韩国赛 2025/2026：全套 Terraform 工程 —— 拿 <code>github-repos/ninejuan/2025_day1_*</code> 对照着读，你会惊奇地发现全都能看懂了</li>
+<li>加拿大安大略赛：CloudFormation/Terraform 版本</li>
+</ul>
+</div>
+</body>
+</html>

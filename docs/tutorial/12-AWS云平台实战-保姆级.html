@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 12 章 · AWS 云平台实战（从零到一架完整架构） - 知识公社</title>
+<meta name="description" content="第 12 章 · AWS 云平台实战（从零到一架完整架构）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-12-章-aws-云平台实战-从零到一架完整架构">第 12 章 · AWS 云平台实战（从零到一架完整架构）</h1>
+<blockquote>前面 11 章都在你自己的机器上折腾。本章开始，我们<strong>到真云上去</strong>。</blockquote>
+<blockquote>世界技能大赛的云计算项目由 AWS 提供比赛平台；韩国赛就是 AWS 全家桶。学完本章，你就拿到了进入比赛主战场的钥匙。</blockquote>
+<blockquote>预计学习时间：3-4 周。<strong>注意产生少量费用（有免费额度，但仍要设置预算报警，见 12.9）。</strong></blockquote>
+<hr>
+<h2 id="12-1-开账号与认识控制台">12.1 开账号与认识控制台</h2>
+<h3 id="12-1-1-注册">12.1.1 注册</h3>
+<ol>
+<li>打开 <code>aws.amazon.com</code> → 创建账户（需要：邮箱 + 信用卡/银联卡 + 手机号）</li>
+<li>区域选择：<strong>建议注册海外区（如美国俄勒冈 us-west-2）</strong>——国际版功能全（比赛同款），国内区（宁夏/北京）由光环新网运营，功能略不同</li>
+<li>注册后第一次登录就是"根用户（root）"——<strong>这个账号是"上帝账号"，永远不要日常使用它</strong>（马上往下看为什么）</li>
+</ol>
+<h3 id="12-1-2-先设两个保命符-注册完立刻做">12.1.2 先设两个保命符（注册完立刻做！）</h3>
+<p><strong>① 根用户开 MFA（双因素认证）</strong>： 右上角账号名 → Security credentials → Assign MFA device → 手机装个验证器 App（如 Google Authenticator）扫码绑定。</p>
+<p><strong>② 设置预算警报（防止一夜扣费几百刀）</strong>： 搜索栏搜 <strong>Budgets</strong> → 创建预算 → 每月成本预算 $10 → 设 50%（$5）时邮件报警。</p>
+<blockquote><strong>新手保护机制：预算警报是你最重要的安全网。</strong> 记住：云上"忘记删的资源"会一直花钱（尤其是 EC2、RDS、NAT 网关）。</blockquote>
+<hr>
+<h2 id="12-2-iam-给-人-和-程序-发工牌">12.2 IAM：给"人"和"程序"发工牌</h2>
+<p><strong>核心思想：永远不用根账号干活，按需创建子用户/角色。</strong></p>
+<h3 id="12-2-1-创建一个管理员子用户-给自己用">12.2.1 创建一个管理员子用户（给自己用）</h3>
+<ol>
+<li>搜索 <strong>IAM</strong> → 用户 → 创建用户</li>
+<li>名字：<code>admin-me</code>，勾选"提供控制台访问"，设密码</li>
+<li>权限：勾选"直接附加策略" → 选 <code>AdministratorAccess</code>（学习期先全权；生产要最小权限）</li>
+<li>创建完成 → <strong>用这个新用户重新登录控制台</strong></li>
+</ol>
+<h3 id="12-2-2-核心概念三板斧">12.2.2 核心概念三板斧</h3>
+<div class="tw"><table><thead><tr><th>概念</th><th>是什么</th><th>比喻</th></tr></thead><tbody>
+<tr><td><strong>用户（User）</strong></td><td>一个人/一个程序的账号</td><td>员工的工牌</td></tr>
+<tr><td><strong>策略（Policy）</strong></td><td>一份 JSON 权限清单</td><td>工牌的开门范围</td></tr>
+<tr><td><strong>角色（Role）</strong></td><td>可以被"借用"的身份</td><td>临时通行证（EC2/K8s 用它访问别的服务）</td></tr>
+</tbody></table></div>
+<p><strong>策略长这样（JSON）：</strong></p>
+<pre><code>{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [&quot;s3:GetObject&quot;, &quot;s3:PutObject&quot;],
+      &quot;Resource&quot;: &quot;arn:aws:s3:::my-bucket/*&quot;
+    }
+  ]
+}</code></pre>
+<p>读法："允许 对 my-bucket 下的对象 执行 读取和上传 操作"。<strong>最小权限原则</strong>：只给需要的动作。</p>
+<h3 id="12-2-3-访问密钥-给程序用的-用户名密码">12.2.3 访问密钥（给程序用的"用户名密码"）</h3>
+<p>命令行工具（aws cli / Terraform）需要密钥：IAM → 用户 → 安全凭证 → 创建访问密钥。</p>
+<pre><code># 在 Linux 上装 AWS CLI
+sudo apt install -y awscli
+aws configure
+# 依次输入: Access Key / Secret Key / region (如 us-west-2) / output (json)
+aws sts get-caller-identity    # 验证：显示你的账号信息 = 配好了</code></pre>
+<p>⚠️ <strong>密钥 = 你的银行卡号+密码</strong>。绝不提交到 GitHub、绝不发给别人。（实践中推荐用 SSO/角色而不是长期密钥，学习期先这样。）</p>
+<hr>
+<h2 id="12-3-vpc-在云上圈一块地-最重要的一节">12.3 VPC：在云上圈一块地（最重要的一节）</h2>
+<p><strong>VPC（Virtual Private Cloud）= 你在 AWS 里私有的"虚拟机房"</strong>。所有资源（服务器、数据库）都住在这个机房里。</p>
+<h3 id="12-3-1-三个核心概念">12.3.1 三个核心概念</h3>
+<ul>
+<li><strong>子网（Subnet）</strong>：机房里的"房间"。分<strong>公有子网</strong>（能通互联网，放对外服务）和<strong>私有子网</strong>（不通互联网，放数据库等宝贝）——<strong>公有/私有分离是安全设计的起点</strong>。</li>
+<li><strong>路由表（Route Table）</strong>：房间门口的"路牌"——去互联网走哪条路、去别的子网走哪条路。</li>
+<li><strong>网关</strong>：通往互联网的大门。<strong>IGW</strong>（Internet Gateway，正常大门）；<strong>NAT Gateway</strong>（让私有子网的机器"单向外访"后门——可以出去下载更新，但外面进不来）。</li>
+</ul>
+<h3 id="12-3-2-手把手建一套-vpc-控制台操作-逐屏对照">12.3.2 手把手建一套 VPC（控制台操作，逐屏对照）</h3>
+<ol>
+<li>搜索 <strong>VPC</strong> → 创建 VPC</li>
+<li>名称 <code>my-vpc</code>，IPv4 网段 <code>10.0.0.0/16</code>（能容纳 6 万多个 IP，"小区"够大）</li>
+<li>顺便建子网（勾选）：</li>
+</ol>
+<ul>
+<li>公有子网 ×2：<code>10.0.1.0/24</code>（可用区 A）、<code>10.0.2.0/24</code>（可用区 B）</li>
+<li>私有子网 ×2：<code>10.0.11.0/24</code>、<code>10.0.12.0/24</code></li>
+</ul>
+<ol>
+<li>创建 IGW 并绑定到 VPC</li>
+<li><strong>给公有子网的路由表</strong>加一条：<code>0.0.0.0/0 → IGW</code>（"去互联网都走大门"）</li>
+<li>（进阶）建 NAT 网关放在公有子网，给私有子网路由 <code>0.0.0.0/0 → NAT</code></li>
+</ol>
+<p><strong>为什么两个可用区？</strong> 可用区 ≈ 物理上分开的机房。一个机房停电，另一个还在——<strong>这就是云上的"高可用"</strong>。世界赛架构题第一要求就是"多可用区部署"。</p>
+<p><strong>验证理解</strong>：画一张图（VPC 里 4 个子网、各自的出口），能从记忆里画出来，这节才算学会。</p>
+<hr>
+<h2 id="12-4-ec2-启动你的云服务器">12.4 EC2：启动你的云服务器</h2>
+<h3 id="12-4-1-启动第一台-逐屏手把手">12.4.1 启动第一台（逐屏手把手）</h3>
+<ol>
+<li>搜索 <strong>EC2</strong> → 启动实例</li>
+<li>名称 <code>my-first-server</code></li>
+<li>镜像（AMI）：<strong>Ubuntu Server 22.04 LTS</strong></li>
+<li>实例类型：<code>t2.micro</code>（免费额度机型）</li>
+<li><strong>密钥对</strong>：创建新密钥对 <code>mykey</code> → 下载 <code>.pem</code> 文件（<strong>丢了就永远连不上这台机器</strong>，好好保管）</li>
+<li><strong>网络设置</strong>：选你刚建的 VPC、公有子网；安全组勾选"允许 SSH"（22 端口）</li>
+<li>存储：默认 8GB gp3</li>
+<li>启动！等 1 分钟 → 状态"运行中"</li>
+</ol>
+<h3 id="12-4-2-连上去">12.4.2 连上去</h3>
+<pre><code># ① 修权限（.pem 必须只有你能读，否则 ssh 拒绝）
+chmod 400 ~/Downloads/mykey.pem
+
+# ② 连接（IP 在控制台能拿到——&quot;公有 IPv4 地址&quot;）
+ssh -i ~/Downloads/mykey.pem ubuntu@&lt;公网IP&gt;
+# → 你就登录到云端的服务器了！和本地虚拟机一模一样地用</code></pre>
+<p><strong>从这一刻起，第 1-9 章学的一切都可以在云上用了。</strong> 试试：</p>
+<pre><code>sudo apt update &amp;&amp; sudo apt install -y nginx
+# 然后在控制台：安全组 → 入站规则 → 允许 HTTP 80 端口
+# 浏览器访问 http://&lt;公网IP&gt; → Welcome to nginx!</code></pre>
+<p>（回忆第 2 章："云安全组 + 服务器防火墙"两道门。这道题你做过 N 遍了。）</p>
+<h3 id="12-4-3-省钱要点-新手最容易烧钱的地方">12.4.3 省钱要点（新手最容易烧钱的地方）</h3>
+<ul>
+<li>不用了就 <strong>stop</strong>（停止），不要留着跑（停止后不收计算费，但硬盘/弹性 IP 仍可能小计费）</li>
+<li><strong>彻底不用就 terminate（终止）</strong>——但注意：终止=连硬盘一起销毁，不可恢复</li>
+<li>免费额度：每月 750 小时 t2.micro/t3.micro（够一台机器整月）</li>
+</ul>
+<hr>
+<h2 id="12-5-s3-无限大的网盘-对象存储">12.5 S3：无限大的网盘（对象存储）</h2>
+<p><strong>S3 = 存文件的超级网盘</strong>（照片、备份、静态网站、大数据都能放），容量无限，按量付费。</p>
+<h3 id="12-5-1-动手指南">12.5.1 动手指南</h3>
+<pre><code># 命令行操作（比控制台点更快）
+aws s3 ls                          # 列出你的桶（bucket）
+aws s3 mb s3://my-bucket-唯一名字   # 建桶（名字全球唯一！）
+aws s3 cp 本地文件.txt s3://my-bucket-唯一名字/    # 上传
+aws s3 ls s3://my-bucket-唯一名字/                 # 查看
+aws s3 sync ~/photos s3://my-bucket-唯一名字/photos/   # 整个目录同步（增量上传）★
+aws s3 cp s3://my-bucket-唯一名字/文件.txt ./       # 下载
+aws s3 rm s3://my-bucket-唯一名字/文件.txt          # 删除</code></pre>
+<h3 id="12-5-2-三个-比赛常用-场景">12.5.2 三个"比赛常用"场景</h3>
+<ol>
+<li><strong>静态网站托管</strong>：桶属性开"静态网站托管"，上传 index.html，浏览器直接访问（便宜到几乎免费）</li>
+<li><strong>备份目标</strong>：<code>aws s3 sync /backup s3://桶/backup/</code>（配 crontab = 自动云备份）</li>
+<li><strong>事件驱动</strong>：上传文件触发 Lambda（韩国赛题的核心模式！第 13 章展开）</li>
+</ol>
+<h3 id="12-5-3-权限与安全">12.5.3 权限与安全</h3>
+<ul>
+<li>默认全私有（好！）；要给外部访问用<strong>桶策略</strong>或<strong>预签名 URL</strong>（定时临时链接）</li>
+<li>门禁细节：IAM 策略（谁能操作桶）+ 桶策略（桶自己声明谁能进）+ 加密（SSE-S3/KMS）</li>
+</ul>
+<hr>
+<h2 id="12-6-rds-让云托管你的数据库">12.6 RDS：让云托管你的数据库</h2>
+<p>手动装 MySQL（第 3 章）还要自己备份、打补丁、扩容、容灾。<strong>RDS = 托管的数据库</strong>：这些烦人事 AWS 全包。</p>
+<h3 id="12-6-1-建一个">12.6.1 建一个</h3>
+<ol>
+<li>搜索 <strong>RDS</strong> → 创建数据库 → MySQL</li>
+<li>模板选"免费套餐"→ 实例 <code>db.t3.micro</code></li>
+<li><strong>多可用区部署</strong>：生产选"是"（备库同步，主挂了自动切换）；学习选"否"省钱</li>
+<li>网络：选你的 VPC + <strong>私有子网</strong>（数据库永远不放公有子网）</li>
+<li>安全组：只允许来自"应用服务器安全组"的 3306——<strong>不要对 0.0.0.0/0 开放！</strong></li>
+<li>设置主密码 → 创建（等几分钟）</li>
+</ol>
+<h3 id="12-6-2-连上它">12.6.2 连上它</h3>
+<pre><code>sudo apt install -y mysql-client
+mysql -h &lt;RDS端点地址&gt; -u admin -p</code></pre>
+<p>（端点地址在 RDS 控制台"连接和安全性"里，形如 <code>xxx.us-west-2.rds.amazonaws.com</code>）</p>
+<h3 id="12-6-3-rds-的价值-比赛视角">12.6.3 RDS 的价值（比赛视角）</h3>
+<ul>
+<li>自动备份（时间点恢复）、自动补丁、一键加只读副本（读扩展）、多可用区故障自动切换</li>
+<li><strong>考点</strong>：题目常说"数据库必须多可用区+只读副本+自动备份"——就是创建时勾选项</li>
+</ul>
+<hr>
+<h2 id="12-7-负载均衡-自动伸缩-云上的第-6-章升级版">12.7 负载均衡 + 自动伸缩（云上的第 6 章升级版）</h2>
+<p><strong>ELB（负载均衡器）+ ASG（Auto Scaling Group，自动伸缩组）</strong> = 你第 6 章手搓的"负载均衡+多台机器"，全部托管化。</p>
+<h3 id="12-7-1-概念对照-你学过的-vs-云上的">12.7.1 概念对照（你学过的 vs 云上的）</h3>
+<div class="tw"><table><thead><tr><th>你手搓的</th><th>AWS 托管</th></tr></thead><tbody>
+<tr><td>HAProxy</td><td>ALB（应用负载均衡）/ NLB（网络负载均衡）</td></tr>
+<tr><td>keepalived VIP</td><td>ELB 自带（多可用区节点）</td></tr>
+<tr><td>多台 web 服务器</td><td>ASG（按规则自动增减 EC2）</td></tr>
+<tr><td>健康检查 check</td><td>目标组健康检查</td></tr>
+<tr><td>手动加机器</td><td>伸缩策略（CPU&gt;70% 加一台）</td></tr>
+</tbody></table></div>
+<h3 id="12-7-2-搭一套-核心操作">12.7.2 搭一套（核心操作）</h3>
+<ol>
+<li><strong>建启动模板</strong>（Launch Template）：定义"新人"的规格（AMI、机型、密钥、安全组、用户数据）</li>
+</ol>
+<ul>
+<li>用户数据（User data）里可以直接写安装脚本：</li>
+</ul>
+<pre><code>     #!/bin/bash
+     apt update &amp;&amp; apt install -y nginx
+     echo &quot;Hello from $(hostname)&quot; &gt; /var/www/html/index.html</code></pre>
+<ol>
+<li><strong>建 ALB</strong>：选两个公有子网 → 建目标组（Target Group，健康检查路径 <code>/</code>）</li>
+<li><strong>建 ASG</strong>：挂刚建的模板 → 选两个公有子网 → 期望容量 2，最小 1，最大 4 → 挂到 ALB 目标组</li>
+<li><strong>配伸缩策略</strong>：目标跟踪 → CPU 利用率 70%</li>
+<li>访问 ALB 的 DNS 名称 → 看到页面！<strong>刷新几次，看到不同主机名</strong> = 负载均衡 OK。</li>
+<li>压测触发扩容（装 <code>stress</code> 或 <code>ab</code>），观察 ASG 自动加机器（Activity 历史里能看到）</li>
+</ol>
+<p><strong>这套东西 = 葡萄牙赛题的核心（ASG + step scaling + NLB）</strong>。做完这个实验，你已经能看懂一半的真题架构。</p>
+<hr>
+<h2 id="12-8-cloudwatch-监控你的云">12.8 CloudWatch：监控你的云</h2>
+<pre><code># 常用操作（也能控制台点点点）
+aws cloudwatch list-metrics --namespace AWS/EC2 | head
+# 看某台机器 CPU：
+aws cloudwatch get-metric-statistics --namespace AWS/EC2 \
+  --metric-name CPUUtilization --dimensions Name=InstanceId,Value=&lt;实例ID&gt; \
+  --start-time $(date -d &#x27;1 hour ago&#x27; +%FT%TZ) --end-time $(date +%FT%TZ) \
+  --period 300 --statistics Average</code></pre>
+<ul>
+<li><strong>告警</strong>：CloudWatch → 告警 → 创建（如 CPU &gt; 80% 发邮件）——比赛里"高可用与监控"评分点的同款</li>
+<li><strong>日志</strong>：装 CloudWatch Agent 把应用日志送上云（韩国 2026 题考点）</li>
+<li>记住三个词：<strong>指标（Metrics）→ 告警（Alarms）→ 日志（Logs）</strong></li>
+</ul>
+<hr>
+<h2 id="12-9-综合项目-在云上复刻你的-个人小站-毕业设计">12.9 综合项目：在云上复刻你的"个人小站"（毕业设计）</h2>
+<p><strong>要求</strong>（把前面所有章节的能力搬到云上）：</p>
+<ol>
+<li>VPC：2 公有子网 + 2 私有子网，跨两个可用区</li>
+<li>EC2：一台 Web 服务器在公有子网，跑你的网站（用 user data 自动安装）</li>
+<li>S3：静态资源放 S3；开启备份同步</li>
+<li>RDS：MySQL 在私有子网，只允许 Web 服务器访问</li>
+<li>ALB + ASG：两台 EC2 起步，挂负载均衡，配 CPU 70% 伸缩</li>
+<li>CloudWatch：CPU 告警 + RDS 连接数告警</li>
+<li>IAM：给 EC2 挂"只能读写自己 S3 桶"的角色（不要用密钥）</li>
+<li>预算：$10 告警开着</li>
+<li><strong>验收</strong>：浏览器访问 ALB 地址循环看到两台机器的响应；压测触发扩容；停止一台 EC2 看 ALB 自动摘除</li>
+<li><strong>删除所有资源</strong>（terraform destroy 或手动清理），确认账单回零</li>
+</ol>
+<p><strong>做完这个项目，你就拥有了"云架构师初级"的实操能力——这已经是世赛题目的入门水平。</strong></p>
+<hr>
+<h2 id="12-10-自检清单">12.10 自检清单</h2>
+<ul>
+<li>[ ] 我理解根账号/子用户/角色/策略的区别并合规矩地使用</li>
+<li>[ ] 我能从零建 VPC（公私子网分离 + 路由 + 网关）</li>
+<li>[ ] 我启动过 EC2 并 SSH 连接、配安全组</li>
+<li>[ ] 我用过 S3 的同步/静态网站/事件通知至少两项</li>
+<li>[ ] 我建过 RDS 并知道为什么它要放私有子网</li>
+<li>[ ] 我搭过 ALB + ASG 并见证自动扩容</li>
+<li>[ ] 我配置过 CloudWatch 告警和预算警报</li>
+<li>[ ] 我知道"用完要删资源"，并管住过自己的账单</li>
+</ul>
+<h3 id="对应真题">对应真题</h3>
+<ul>
+<li>韩国赛 2021-2025 全部题目（VPC/EC2/ELB/S3/RDS/CloudWatch/IAM/KMS 全家族）</li>
+<li>葡萄牙 2024 全国冠军工程（多 VPC + Peering + NLB + ASG + EFS + RDS）</li>
+<li>世界赛云架构模块（AWS 平台）</li>
+<li><strong>下一步</strong>：把 <code>github-repos/</code> 里韩国选手的 Terraform 题解打开对照——你会发现架构图的每一块你都亲手做过</li>
+</ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>云计算 · 竞赛学习项目 - 知识公社</title>
+<meta name="description" content="云计算 · 竞赛学习项目：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="index.html">← 返回项目首页</a>
+<h1 id="云计算-竞赛学习项目">云计算 · 竞赛学习项目</h1>
+<blockquote><strong>零基础 → 省赛 → 国赛 → 世赛</strong>，一条能直接照着跑的云计算备赛线。</blockquote>
+<blockquote>30 天作战板 · 7 套全真模拟卷 · 21 套公开真题 · 一键实验环境 · 20 章保姆级教程</blockquote>
+<p>&lt;p&gt; &lt;img alt="零基础可入" src="https://img.shields.io/badge/零基础-可入-2b5cd9"&gt; &lt;img alt="7 套全真卷" src="https://img.shields.io/badge/全真模拟卷-7 套-0f9d6c"&gt; &lt;img alt="21 套真题" src="https://img.shields.io/badge/公开真题-21 套-b26a00"&gt; &lt;img alt="完全离线" src="https://img.shields.io/badge/内容-完全离线-9e2b25"&gt; &lt;/p&gt;</p>
+<hr>
+<h2 id="这是什么">这是什么</h2>
+<p>不是资料堆，是一套<strong>能直接执行</strong>的云计算学习项目：</p>
+<ul>
+<li>🎯 <strong>给第一次参赛的人</strong>：填上比赛日期，30 天作战板每天告诉你「今天做什么」</li>
+<li>📝 <strong>给要拿分的人</strong>：7 套全真模拟卷 + 计时执行器 + 逐项评分，像真比赛一样打</li>
+<li>🧪 <strong>给要动手的人</strong>：OpenStack / Kubernetes 一键实验脚本 + 四层通关任务书</li>
+<li>📚 <strong>给想系统学的人</strong>：20 章保姆级教程 + 官方职业标准中文版 + 21 套真题题库</li>
+</ul>
+<h2 id="第一步-先在你自己的电脑上装好-linux">🖥 第一步：先在你自己的电脑上装好 Linux</h2>
+<blockquote>零基础最常卡住的就是这一步，所以做成一键脚本了。</blockquote>
+<div class="tw"><table><thead><tr><th>你的系统</th><th>一条命令</th><th>说明</th></tr></thead><tbody>
+<tr><td><strong>Windows</strong></td><td>`irm https://raw.githubusercontent.com/TaiMaBenJi/cloud-computing-learning/main/setup/setup-windows.ps1 \</td><td>iex`</td><td>管理员 PowerShell 里执行。自动装 WSL2 + Ubuntu 24.04 + <strong>打开 systemd</strong>（关键）。首次需重启，重启后再跑一遍</td></tr>
+<tr><td><strong>macOS</strong></td><td><code>bash setup/setup-linux.sh</code></td><td>系统自带 Linux 环境，装依赖即可</td></tr>
+<tr><td><strong>已有 Linux/WSL</strong></td><td><code>bash setup/setup-linux.sh</code></td><td>同上</td></tr>
+</tbody></table></div>
+<p>装完<strong>必做体检</strong>：<code>bash setup/check-env.sh</code>　（全绿再开练；<code>-v</code> 看逐项依据）</p>
+<p>图文版（含每一步的坑）：<strong><a href="setup/README.html"><code>setup/README.md</code></a></strong></p>
+<div class="tw"><table><thead><tr><th>文件</th><th>内容</th></tr></thead><tbody>
+<tr><td><a href="setup/setup-linux.sh"><code>setup/setup-linux.sh</code></a></td><td>练习环境一键安装（幂等、可重复执行；<code>NO_DOCKER=1</code> / <code>NO_K8S=1</code> 可跳段）</td></tr>
+<tr><td><a href="setup/setup-windows.ps1"><code>setup/setup-windows.ps1</code></a></td><td>Windows 一键：WSL2 + Ubuntu + systemd + 拉仓库 + 装依赖</td></tr>
+<tr><td><a href="setup/check-env.sh"><code>setup/check-env.sh</code></a></td><td>环境体检，告诉你这台机器到底行不行</td></tr>
+<tr><td><a href="linux-plan.html"><code>linux-plan.html</code></a></td><td><strong>Linux 21 天每日计划</strong> · 每天一张卡：命令 / 动手任务 / 过关自测，进度存本机，可打印</td></tr>
+</tbody></table></div>
+<h2 id="不想装环境-现在就能开考">⚡ 不想装环境？现在就能开考</h2>
+<p><strong><a href="arena.html"><code>arena.html</code></a></strong> —— 单文件 364KB，<strong>零依赖、双击即开、断网可用</strong>：</p>
+<div class="tw"><table><thead><tr><th>里面有什么</th><th>说明</th></tr></thead><tbody>
+<tr><td>🧪 <strong>虚拟考场</strong></td><td>浏览器内一台真 Linux 服务器：文件系统 / systemd / Nginx / MySQL / Docker / Ansible / 防火墙 / DNS / 负载均衡 / 证书，<strong>22 个场景自动评分</strong>（做对得分、改对即补分）</td></tr>
+<tr><td>🏟 <strong>竞赛仿真场</strong></td><td>5 场赛事；<strong>世赛里昂 2024 Module A 的 16 个评分点 / 52 个官方 task 编号全部可自动判定</strong>，模块权重 / 限时 / 交卷 / 成绩报告</td></tr>
+<tr><td>⏱ <strong>限时模拟赛</strong></td><td>4 套：迷你 30 分钟 · 标准 90 分钟 · 全真 240 分钟（世界赛 Module 风格）· 排障特训 45 分钟</td></tr>
+<tr><td>📋 <strong>全真卷中心</strong></td><td>7 套真题卷逐条自评打勾，共 331 条检查项，进度存本机</td></tr>
+</tbody></table></div>
+<blockquote>没有设备、网络受限、或就是想先看看考场长什么样 —— 直接开这个，不用任何准备。</blockquote>
+<blockquote>有了真机之后再回下面的「三步开始」，效率最高。</blockquote>
+<h2 id="三步开始">🚀 三步开始</h2>
+<ol>
+<li><strong>装环境</strong> —— 跑 <code>setup/</code> 里对应你系统的那条命令，然后 <code>bash setup/check-env.sh</code> 体检</li>
+<li><strong>打地基</strong> —— 打开 <a href="linux-plan.html">Linux 21 天计划</a>，每天 60–90 分钟，一张卡照做</li>
+<li><strong>开练</strong> —— 打开 <a href="start.html">30 天作战板</a> 填上比赛日期，按表推进</li>
+<li><strong>每周末打一卷</strong> —— 打开 <a href="sim/index.html">模拟中心</a>，计时、评分、复盘</li>
+</ol>
+<blockquote>不想装环境？直接看 <a href="docs/tutorial/README-教程总览.html">教程</a> 和 <a href="papers/真题题库-21套.html">真题题库</a>，纸上也能先入门。</blockquote>
+<h2 id="目录结构">📁 目录结构</h2>
+<div class="tw"><table><thead><tr><th>目录 / 文件</th><th>内容</th></tr></thead><tbody>
+<tr><td><a href="arena.html"><code>arena.html</code></a></td><td><strong>模拟考场</strong>（单文件）：虚拟 Linux 服务器 + 竞赛仿真场 + 限时赛 + 7 套全真卷，零依赖离线可用</td></tr>
+<tr><td><a href="start.html"><code>start.html</code></a></td><td><strong>首赛倒计时 · 30 天作战板</strong>（倒计时 + 逐日任务 + 打勾进度）</td></tr>
+<tr><td><a href="setup/README.html"><code>setup/</code></a></td><td><strong>在自己电脑上装环境</strong>：Windows/macOS/Linux 一键脚本 + 环境体检</td></tr>
+<tr><td><a href="linux-plan.html"><code>linux-plan.html</code></a></td><td><strong>Linux 21 天每日计划</strong>：会用 → 会管 → 会修，每天带过关自测</td></tr>
+<tr><td><a href="week1.html"><code>week1.html</code></a></td><td>七天开蒙卡（零基础第一周）</td></tr>
+<tr><td><a href="sprint.html"><code>sprint.html</code></a></td><td>30 天冲刺手册（完整版方法论）</td></tr>
+<tr><td><a href="sim/index.html"><code>sim/</code></a></td><td><strong>全赛模拟中心</strong>：7 套全真卷 + <a href="sim/sim.html">计时执行器</a></td></tr>
+<tr><td><a href="labs/README.html"><code>labs/</code></a></td><td>真机考场：环境三路线 + OpenStack/K8s 一键脚本</td></tr>
+<tr><td><a href="labs/cloudlab/README.html"><code>labs/cloudlab/</code></a></td><td>四层通关任务书（L1 Linux → L4 K8s）+ 自动评分脚本</td></tr>
+<tr><td><a href="docs/tutorial/README-教程总览.html"><code>docs/tutorial/</code></a></td><td>20 章保姆级教程（Linux/网络/服务/Docker/K8s/AWS/排障/安全…）</td></tr>
+<tr><td><a href="papers/真题题库-21套.html"><code>papers/</code></a></td><td><strong>21 套公开真题题库</strong> + 韩国世赛真题中译（2021–2025）</td></tr>
+<tr><td><a href="papers/korea-zh/"><code>papers/korea-zh/</code></a></td><td>韩国全国技能大赛云计算真题（题面 + 评分标准，中译）</td></tr>
+<tr><td><a href="resources/"><code>resources/</code></a></td><td>官方标准：WSOS 2026 中文全文 · TD53 中文导读与英文原件 · 金砖规程</td></tr>
+</tbody></table></div>
+<h2 id="7-套全真模拟卷-sim">🏆 7 套全真模拟卷（<code>sim/</code>）</h2>
+<div class="tw"><table><thead><tr><th>卷</th><th>依据</th><th>适合</th></tr></thead><tbody>
+<tr><td>省赛真题卷 · 2024 广东样题①</td><td>公开赛卷原文</td><td>第一套全真</td></tr>
+<tr><td>国赛结构卷 · GZ075 三模块</td><td>2023 国赛公开分值结构</td><td>主赛道</td></tr>
+<tr><td><strong>国赛真题卷 · 2023 赛卷 1</strong></td><td>公开赛卷原文收录</td><td>冲金</td></tr>
+<tr><td>世职赛团队卷</td><td>2025 教育部赛制</td><td>团队赛</td></tr>
+<tr><td>金砖卷 · BRICS-FS-11</td><td>2024 规程原件</td><td>金砖线</td></tr>
+<tr><td><strong>韩国世赛真题卷 2025</strong></td><td>真题原文中译（AWS 全线）</td><td>世赛线</td></tr>
+<tr><td><strong>WSC2026 上海世赛四日模考</strong></td><td>官方 TD53 + WSOS 权重原创命题</td><td>世赛冲刺</td></tr>
+</tbody></table></div>
+<blockquote>每卷都标注了命题依据：真题原文 / 官方标准 / 同构原创——<strong>不含编造的"真题"</strong>。</blockquote>
+<h2 id="实验环境-labs">🧪 实验环境（<code>labs/</code>）</h2>
+<ul>
+<li><strong>路线 A · 纯云</strong>：AWS Free Tier / AWS Academy / 华为云·阿里云学生机</li>
+<li><strong>路线 B · 双机虚拟机</strong>：16–32G 内存，VMware/VirtualBox，CentOS 7.9 / openEuler</li>
+<li><strong>路线 C · 一键脚本</strong>：<code>labs/openstack-train-allinone.sh</code> + <code>labs/k8s-cluster.sh</code>（幂等可重跑）</li>
+</ul>
+<h2 id="30-天路线-摘要">🧭 30 天路线（摘要）</h2>
+<div class="tw"><table><thead><tr><th>周</th><th>主攻</th><th>验收</th></tr></thead><tbody>
+<tr><td>W1</td><td>Linux / 网络 / 网站服务 / Docker 入门</td><td>闭卷搭「静态站 + MySQL」</td></tr>
+<tr><td>W2</td><td>DNS / HTTPS / 负载均衡 / Shell</td><td>一条龙闭卷跑通</td></tr>
+<tr><td>W3</td><td><strong>私有云</strong>：OpenStack 搭建链 → 运维 → 脚本</td><td>搭建链 90 分钟闭卷</td></tr>
+<tr><td>W4</td><td><strong>容器云</strong>：kubeadm / 部署 / CI-CD / 排错</td><td>省赛卷容器模块限时</td></tr>
+<tr><td>W5</td><td>公有云 + 全真模拟 + 错题回炉</td><td>两套整卷限时模拟</td></tr>
+</tbody></table></div>
+<p>详细每日任务见 <a href="start.html"><code>start.html</code></a>。</p>
+<h2 id="来源与合规">📖 来源与合规</h2>
+<ul>
+<li>真题文本来自公开渠道（CSDN 等，多为 CC BY-SA），保留来源链接，<strong>仅供学习研究</strong>，请勿去除出处二次分发。</li>
+<li>官方标准文件（WSOS / TD53 / 金砖规程）版权归 WorldSkills、金砖组委会等原机构，此处仅作学习引用。</li>
+<li>本项目的完整版（含 62 集视频课、50 个世赛赛项、全站资源库）见姊妹项目 <strong><a href="https://github.com/TaiMaBenJi/knowledge-commons">知识公社 knowledge-commons</a></strong>（在线版：&lt;https://taimabenji.github.io/knowledge-commons/&gt;）。</li>
+</ul>
+<h2 id="贡献">🤝 贡献</h2>
+<p>欢迎提交 Issue / PR：补充真题、修正任务书、优化脚本。内容以「可验证、可复现」为准，引用请注明来源。</p>
+<hr>
+<p>&lt;p align="center"&gt;&lt;b&gt;比赛不是背出来的，是一套一套卷打出来的。&lt;/b&gt;&lt;br&gt;从 Day 1 开始。💪&lt;/p&gt;</p>
+</div>
+</body>
+</html>

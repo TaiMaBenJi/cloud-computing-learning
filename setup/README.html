@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>在你自己的电脑上把 Linux 环境装起来 - 知识公社</title>
+<meta name="description" content="在你自己的电脑上把 Linux 环境装起来：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../index.html">← 返回项目首页</a>
+<h1 id="在你自己的电脑上把-linux-环境装起来">在你自己的电脑上把 Linux 环境装起来</h1>
+<blockquote>三条命令，从零到能练。整个过程 <strong>免费</strong>，装完断网也能继续学。</blockquote>
+<hr>
+<h2 id="你是什么系统-照下面走">你是什么系统？照下面走</h2>
+<h3 id="windows-最常见">🪟 Windows（最常见）</h3>
+<p><strong>第 1 步 · 用管理员身份打开终端</strong></p>
+<p>按 <code>Win</code> 键 → 输入 <code>powershell</code> → 在「Windows PowerShell」上<strong>右键 → 以管理员身份运行</strong></p>
+<p><strong>第 2 步 · 执行一键脚本</strong></p>
+<p>在弹出的窗口里粘贴这一行回车：</p>
+<pre><code>irm https://raw.githubusercontent.com/TaiMaBenJi/cloud-computing-learning/main/setup/setup-windows.ps1 | iex</code></pre>
+<p><strong>会发生什么</strong>：</p>
+<ol>
+<li>启用 WSL2 与虚拟机平台</li>
+<li>安装 Ubuntu 24.04 LTS</li>
+<li><strong>打开 systemd</strong>（这一步是关键，见下方说明）</li>
+<li>克隆本仓库并安装练习依赖</li>
+<li>弹出提示：首次启用 WSL 需要重启 → <strong>重启后再执行一遍同一条命令</strong>（第二步会自动跳过）</li>
+</ol>
+<p><strong>第 3 步 · 体检</strong></p>
+<p>重启后打开「Windows Terminal」，选 Ubuntu 标签（或输入 <code>wsl</code>），执行：</p>
+<pre><code>cd ~/cloud-computing-learning
+bash setup/check-env.sh</code></pre>
+<p>看到「通过 N」且没有红色 ✗ 就可以开始了。</p>
+<blockquote>⚠️ <strong>卡在 <code>irm</code> 报错 / 提示脚本禁止运行</strong>：说明 PowerShell 限制了脚本执行。</blockquote>
+<blockquote>改用：先下载 <code>setup-windows.ps1</code> 到本地，再执行</blockquote>
+<blockquote>```powershell</blockquote>
+<blockquote>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</blockquote>
+<blockquote>.\setup-windows.ps1</blockquote>
+<blockquote>```</blockquote>
+<blockquote>⚠️ <strong>卡在「无法加载文件…未经数字签名」</strong>：执行</blockquote>
+<blockquote>```powershell</blockquote>
+<blockquote>Get-ExecutionPolicy -List</blockquote>
+<blockquote>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</blockquote>
+<blockquote>```</blockquote>
+<hr>
+<h3 id="macos">🍎 macOS</h3>
+<p>系统自带 Linux 环境，<strong>不需要装虚拟机</strong>。</p>
+<pre><code># 1) 装 Homebrew（没装过才需要）
+/bin/bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)&quot;
+
+# 2) 装依赖
+brew install curl wget git vim netcat socat rsync tree htop jq
+
+# 3) 装本仓库并初始化
+git clone https://github.com/TaiMaBenJi/cloud-computing-learning.git
+cd cloud-computing-learning
+bash setup/setup-linux.sh
+
+# 4) 体检
+bash setup/check-env.sh</code></pre>
+<blockquote>macOS 没有 systemd，<code>systemctl</code> 相关练习要在 Linux VM 或容器里做。</blockquote>
+<blockquote>建议用 <strong>Parallels / VMware Fusion / UTM</strong> 装一台 Ubuntu 当练习机——</blockquote>
+<blockquote>本仓库的所有评分脚本都以 Linux 为准。</blockquote>
+<hr>
+<h3 id="已经有-linux-wsl">🐧 已经有 Linux / WSL</h3>
+<pre><code>git clone https://github.com/TaiMaBenJi/cloud-computing-learning.git
+cd cloud-computing-learning
+bash setup/setup-linux.sh      # 装依赖
+bash setup/check-env.sh        # 体检</code></pre>
+<hr>
+<h2 id="为什么要折腾-systemd">为什么要折腾 systemd</h2>
+<p><code>systemctl</code> 是赛场的基本功——启服务、看日志、改开机自启，全靠它。</p>
+<p>而 <strong>WSL 默认是没有 systemd 的</strong>，PID 1 是个小程序，<code>systemctl status</code> 会直接报错。 所以 <code>setup-windows.ps1</code> 专门做了这一步：往 <code>/etc/wsl.conf</code> 写入</p>
+<pre><code>[boot]
+systemd=true</code></pre>
+<p>再 <code>wsl --shutdown</code> 让它生效。<strong>跳过这步，后面所有服务操作都做不了。</strong></p>
+<p>验证有没有成功：</p>
+<pre><code>ps -p 1 -o comm=</code></pre>
+<p>输出 <code>systemd</code> 就对了。</p>
+<hr>
+<h2 id="硬件要多少">硬件要多少</h2>
+<div class="tw"><table><thead><tr><th>阶段</th><th>内存</th><th>说明</th></tr></thead><tbody>
+<tr><td>L1 Linux / L2 网络服务</td><td><strong>4 GB</strong> 够</td><td>只跑命令和配置练习</td></tr>
+<tr><td>L3 Docker</td><td><strong>8 GB</strong> 舒服</td><td>Docker 本身不重</td></tr>
+<tr><td>L4 Kubernetes（minikube）</td><td><strong>8 GB</strong> 最低，<strong>16 GB</strong> 舒服</td><td>官方推荐 ≥ 4 核</td></tr>
+<tr><td>OpenStack allinone</td><td><strong>16 GB</strong> 最低</td><td>内核要调大，见下</td></tr>
+</tbody></table></div>
+<p>磁盘预留 <strong>60 GB</strong> 以上。</p>
+<p>OpenStack 如果内存不够，追加内核参数（<code>/etc/security/limits.conf</code> 与 sysctl）：</p>
+<pre><code>echo &#x27;vm.max_map_count = 2097152&#x27; | sudo tee -a /etc/sysctl.conf
+sudo sysctl -w vm.max_map_count=2097152
+sudo systemctl restart libvirtd docker</code></pre>
+<hr>
+<h2 id="装完之后">装完之后</h2>
+<ol>
+<li><strong>学计划</strong>：浏览器打开 <a href="../linux-plan.html"><code>linux-plan.html</code></a>（21 天，每天一张卡）</li>
+<li><strong>练环境</strong>：<a href="../labs/cloudlab/README.html"><code>labs/cloudlab/</code></a> 四层通关任务书 + 自动评分</li>
+<li><strong>打比赛</strong>：<a href="../sim/index.html"><code>sim/index.html</code></a> 7 套全真卷，计时交卷</li>
+</ol>
+<hr>
+<h2 id="脚本参数">脚本参数</h2>
+<div class="tw"><table><thead><tr><th>脚本</th><th>参数</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>setup/setup-linux.sh</code></td><td><code>NO_DOCKER=1</code></td><td>跳过 Docker</td></tr>
+<tr><td></td><td><code>NO_K8S=1</code></td><td>跳过 minikube / kubectl</td></tr>
+<tr><td></td><td><code>DOCKER_CHANNEL=test</code></td><td>用 Docker 测试版通道</td></tr>
+<tr><td><code>setup/check-env.sh</code></td><td><code>-v</code></td><td>逐项显示判断依据</td></tr>
+</tbody></table></div>
+<p>全部脚本<strong>幂等</strong>：重复执行安全，已装的会跳过。</p>
+<hr>
+<h2 id="常见问题">常见问题</h2>
+<div class="tw"><table><thead><tr><th>症状</th><th>原因与解法</th></tr></thead><tbody>
+<tr><td><code>wsl</code> 提示「找不到命令」</td><td>没装 WSL，跑一次 <code>setup-windows.ps1</code> 后重启</td></tr>
+<tr><td><code>systemctl</code> 报 <code>System has not been booted with systemd</code></td><td><code>/etc/wsl.conf</code> 没写或没重启：<code>echo '[boot]' &gt; /etc/wsl.conf &amp;&amp; echo 'systemd=true' &gt;&gt; /etc/wsl.conf &amp;&amp; wsl --shutdown</code></td></tr>
+<tr><td><code>apt update</code> 很慢或超时</td><td>换国内源：见 <code>labs/README.md</code>，或用 <code>sed</code> 把 sources 换成清华/阿里镜像</td></tr>
+<tr><td>Docker 起来了但 <code>docker info</code> 报权限错</td><td><code>sudo usermod -aG docker $USER</code> 后<strong>重新登录</strong></td></tr>
+<tr><td>WSL 占太多 C 盘空间</td><td>把发行版导出后迁到 D 盘：<code>wsl --export</code>、<code>wsl --import</code></td></tr>
+<tr><td>内存不够被 OOM Kill</td><td>WSL 默认只用一半内存：<code>.wslconfig</code> 里写 <code>[wsl2] memory=16GB</code></td></tr>
+<tr><td>虚拟化嵌套失败（VMware 里装 KVM）</td><td>BIOS 里开启 VT-x / AMD-V</td></tr>
+</tbody></table></div>
+</div>
+</body>
+</html>

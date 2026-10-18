@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>L1 · Linux 基础 · 任务书（满分 100） - 知识公社</title>
+<meta name="description" content="L1 · Linux 基础 · 任务书（满分 100）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../../index.html">← 返回项目首页</a>
+<h1 id="l1-linux-基础-任务书-满分-100">L1 · Linux 基础 · 任务书（满分 100）</h1>
+<blockquote>环境：你的练习虚拟机（Rocky 9 / Ubuntu 24.04），root 或 sudo 权限</blockquote>
+<blockquote>建议限时：90 分钟 · 及格 60 · 优秀 85</blockquote>
+<blockquote>规则与世赛一致：<strong>按评分点交付，做对得分，做错不得分</strong>；做完运行评分脚本验收</blockquote>
+<blockquote>评分：<code>sudo bash grade_l1.sh</code>（评分点逻辑与本题面一一对应）</blockquote>
+<h2 id="背景">背景</h2>
+<p>你入职云运维部第一天，主管给你一台全新虚拟机，要求按公司规范完成初始化并跑起第一个业务。</p>
+<h2 id="任务清单-16-个评分点">任务清单（16 个评分点）</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>分值</th><th>评分点</th><th>提示（卡住再看）</th></tr></thead><tbody>
+<tr><td>1</td><td>5</td><td>主机名为 <code>cloudlab</code></td><td><code>hostnamectl set-hostname cloudlab</code>（重连生效）</td></tr>
+<tr><td>2</td><td>5</td><td>时区 <code>Asia/Shanghai</code></td><td><code>timedatectl set-timezone Asia/Shanghai</code></td></tr>
+<tr><td>3</td><td>5</td><td>用户 <code>deployer</code> 已创建</td><td><code>useradd -m deployer</code></td></tr>
+<tr><td>4</td><td>5</td><td><code>deployer</code> 有 sudo 权限</td><td><code>usermod -aG wheel deployer</code>（Ubuntu 用 <code>sudo</code> 组）</td></tr>
+<tr><td>5</td><td>5</td><td><code>deployer</code> 已配 SSH 密钥且权限 600</td><td><code>~deployer/.ssh/authorized_keys</code>，属主 deployer，<code>chmod 600</code></td></tr>
+<tr><td>6</td><td>5</td><td>sshd 运行且监听 22</td><td><code>systemctl status sshd</code> · `ss -ltn \</td><td>grep 22`</td></tr>
+<tr><td>7</td><td>5</td><td>防火墙放行 http</td><td>firewalld：<code>firewall-cmd --permanent --add-service=http &amp;&amp; firewall-cmd --reload</code>；ufw：<code>ufw allow 80/tcp</code></td></tr>
+<tr><td>8</td><td>10</td><td>nginx 运行中</td><td>安装 + <code>systemctl enable --now nginx</code></td></tr>
+<tr><td>9</td><td>10</td><td>本机 80 返回 200</td><td><code>curl -I http://127.0.0.1/</code></td></tr>
+<tr><td>10</td><td>5</td><td>首页含 <code>CloudLab</code> 字样</td><td>改 <code>/var/www/html/index.html</code>，写一句含 CloudLab 的话</td></tr>
+<tr><td>11</td><td>10</td><td>自定义 systemd 服务 <code>app</code> 运行中</td><td>写 <code>/opt/cloudlab/bin/app.sh</code>（循环写日志即可），做 <code>app.service</code>，<code>daemon-reload</code> 后启动</td></tr>
+<tr><td>12</td><td>5</td><td><code>/opt/backup.sh</code> 存在可执行</td><td>tar 打包 <code>/etc</code> 到 <code>/var/backups/backup-$(date +%Y%m%d).tar.gz</code></td></tr>
+<tr><td>13</td><td>5</td><td><code>/var/backups/</code> 有今天的 tar.gz</td><td>手动跑一次 <code>/opt/backup.sh</code> 验证产物</td></tr>
+<tr><td>14</td><td>10</td><td>root 计划任务每天 2 点备份</td><td><code>crontab -e -u root</code>：<code>0 2 * * * /opt/backup.sh</code></td></tr>
+<tr><td>15</td><td>10</td><td>磁盘挂载点 <code>/data</code> 生效</td><td>加一块 1G 虚拟磁盘 → <code>fdisk</code>/<code>parted</code> → <code>mkfs.xfs</code> → <code>mount</code> → 写入 <code>/etc/fstab</code></td></tr>
+<tr><td>16</td><td>5</td><td><code>/opt/sysinfo.sh</code> 输出含内核版本</td><td><code>uname -r</code> + <code>free -h</code>，<code>chmod +x</code></td></tr>
+</tbody></table></div>
+<h2 id="验收">验收</h2>
+<pre><code>sudo bash grade_l1.sh        # 逐项 PASS/FAIL + 总分
+sudo bash grade_l1.sh -v     # 复盘模式：显示每项的检查逻辑</code></pre>
+<h2 id="世赛提示">世赛提示</h2>
+<ul>
+<li>每完成一项<strong>立刻按验收方式自验</strong>——这正是评分表思维</li>
+<li>卡住先看状态：<code>systemctl status</code> → <code>journalctl -xe</code> → 日志</li>
+<li>全部 PASS 后：<strong>拍快照</strong>，然后跑 <code>fault/make_fault_l1.sh</code> 进入排错训练</li>
+</ul>
+</div>
+</body>
+</html>

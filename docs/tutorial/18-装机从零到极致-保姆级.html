@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 18 章 · 装机从零到极致（保姆级） - 知识公社</title>
+<meta name="description" content="第 18 章 · 装机从零到极致（保姆级）：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-18-章-装机从零到极致-保姆级">第 18 章 · 装机从零到极致（保姆级）</h1>
+<blockquote>装机不是"拧螺丝"，是<strong>在一堆兼容性约束里做正确决策，然后一次点亮</strong>。</blockquote>
+<blockquote>这一章带你从"分不清主板和显卡"，走到"能独立完成选件 → 组装 → 装系统 → 烤机 → 排障"的全流程。</blockquote>
+<blockquote>学完你还能：看穿商家的套餐套路、判断一台机器的问题出在哪、给同学和朋友装机不翻车。</blockquote>
+<blockquote><strong>预计学习时间：2 周</strong>（理论 3 天 + 反复看装机实录 3 天 + 在"全网资源库→装机区"跟练 + 有条件者实操 1 台）。</blockquote>
+<hr>
+<h2 id="18-1-先建立整机世界观-10-分钟看懂一台电脑">18.1 先建立整机世界观（10 分钟看懂一台电脑）</h2>
+<h3 id="18-1-1-电脑-一座城市">18.1.1 电脑 = 一座城市</h3>
+<div class="tw"><table><thead><tr><th>部件</th><th>城市里的角色</th><th>干活的时候</th><th>它弱了会怎样</th></tr></thead><tbody>
+<tr><td>CPU</td><td>市长办公室</td><td>处理一切计算和调度</td><td>全局都慢、卡顿</td></tr>
+<tr><td>内存</td><td>办公桌桌面</td><td>摊开正在处理的东西</td><td>多开几个程序就卡</td></tr>
+<tr><td>硬盘（SSD）</td><td>档案室+存取窗口</td><td>存放所有文件</td><td>开机慢、加载慢、软件卡</td></tr>
+<tr><td>显卡</td><td>美术+特效团队</td><td>画面渲染、AI 计算</td><td>游戏掉帧、渲染慢</td></tr>
+<tr><td>主板</td><td>道路网+市政大厅</td><td>连接一切、分配电力通讯</td><td>插不上、跑不满、不稳定</td></tr>
+<tr><td>电源</td><td>发电站</td><td>把市电变成部件要的电</td><td>高负载黑屏重启，甚至烧件</td></tr>
+<tr><td>散热器</td><td>空调系统</td><td>给 CPU/显卡降温</td><td>高温降频、蓝屏、寿命骤减</td></tr>
+<tr><td>机箱</td><td>城市外壳+通风道</td><td>固定部件、组织风道</td><td>装不下、闷罐高温</td></tr>
+</tbody></table></div>
+<p><strong>木桶效应</strong>：短板决定体验。i9 + 老机械硬盘 = 开机 3 分钟；32G 内存 + 亮机卡 = 游戏 10 帧。<strong>平衡比堆料重要。</strong></p>
+<h3 id="18-1-2-八大件清单-购物车核对表">18.1.2 八大件清单（购物车核对表）</h3>
+<pre><code>① CPU         ② 主板        ③ 内存条 ×1~4
+④ 固态硬盘     ⑤ 显卡        ⑥ 电源
+⑦ CPU散热器    ⑧ 机箱
+（外设另配：显示器 / 键盘 / 鼠标 / 音箱）</code></pre>
+<h3 id="18-1-3-台式机-vs-笔记本-vs-迷你主机">18.1.3 台式机 vs 笔记本 vs 迷你主机</h3>
+<div class="tw"><table><thead><tr><th></th><th>台式机</th><th>笔记本</th><th>迷你主机</th></tr></thead><tbody>
+<tr><td>性价比</td><td><strong>最高</strong>（同价性能最强）</td><td>低</td><td>中</td></tr>
+<tr><td>升级</td><td>随便换</td><td>基本不能</td><td>内存/硬盘可以</td></tr>
+<tr><td>便携</td><td>不能</td><td>最强</td><td>可以</td></tr>
+<tr><td>散热/性能释放</td><td>强</td><td>受限于散热</td><td>中</td></tr>
+<tr><td>适合</td><td>游戏/生产力/学习主机</td><td>学生党移动需求</td><td>办公/客厅/软路由</td></tr>
+</tbody></table></div>
+<blockquote>学生党预算有限时，<strong>台式机 + 二手轻薄本</strong>往往比一台全能本更划算。学校机房学习则完全不需要自购。</blockquote>
+<hr>
+<h2 id="18-2-八大件深度认识-看懂参数-不被坑">18.2 八大件深度认识（看懂参数=不被坑）</h2>
+<h3 id="18-2-1-cpu-中央处理器">18.2.1 CPU（中央处理器）</h3>
+<p><strong>要看的 5 个参数</strong>：</p>
+<div class="tw"><table><thead><tr><th>参数</th><th>含义</th><th>怎么看</th></tr></thead><tbody>
+<tr><td>核心/线程</td><td>同时干活的"人手"</td><td>4核8线程日常够，6核12线程起步打游戏，8核+生产力</td></tr>
+<tr><td>频率</td><td>干活速度（GHz）</td><td>看"单核睿频"（游戏敏感）+ "全核频率"</td></tr>
+<tr><td>缓存</td><td>CPU 自带的小仓库（L2/L3）</td><td>越大越好，游戏 CPU 追求大 L3</td></tr>
+<tr><td>平台/插槽</td><td>能不能插上主板</td><td>Intel：LGA1700 / LGA1851；AMD：AM4 / AM5</td></tr>
+<tr><td>功耗（TDP）</td><td>发热和吃电</td><td>决定散热器和电源怎么选</td></tr>
+</tbody></table></div>
+<p><strong>常见后缀</strong>（Intel）：<code>K</code>=可超频、<code>F</code>=无核显、<code>KF</code>=无核显可超频、<code>T</code>=低功耗、无后缀=标准。例：i5-14600KF。 <strong>AMD</strong>：<code>X</code>=高性能版、<code>G</code>=带核显、<code>X3D</code>=大缓存游戏神U、无后缀=标准。例：R7 7800X3D。</p>
+<p><strong>盒装 vs 散片</strong>：盒装官方质保、自带散热器（高端款不带）；散片便宜但质保渠道不同（多为店保）。<strong>买散片认准靠谱店铺，且注意"QS/ES 版"（工程样品）千万别买</strong>——参数好看但不稳定、无质保。</p>
+<p><strong>核显</strong>：不带 F 的 Intel 和多数 AMD 带核显，够日常办公 + 硬解视频；<strong>独立显卡与核显可以同时存在</strong>（显示器插哪块用哪块，插主板口=用核显）。</p>
+<h3 id="18-2-2-主板-一切的连接底座">18.2.2 主板（一切的连接底座）</h3>
+<p><strong>芯片组（决定功能上限）</strong>：</p>
+<div class="tw"><table><thead><tr><th>档次</th><th>Intel 例</th><th>AMD 例</th><th>适合</th></tr></thead><tbody>
+<tr><td>入门</td><td>H610 / B760</td><td>A620 / B650</td><td>不折腾、够用就好</td></tr>
+<tr><td>主流</td><td>B760 / B860</td><td>B650 / B850</td><td><strong>大多数人的选择</strong>（供电够、接口够）</td></tr>
+<tr><td>高端</td><td>Z790 / Z890</td><td>X670E / X870</td><td>超频、插满扩展</td></tr>
+</tbody></table></div>
+<p><strong>关键接口（对照主板说明书看）</strong>：</p>
+<ul>
+<li><strong>CPU 插座</strong>：必须与 CPU 插槽完全一致（LGA1700 ≠ LGA1851，AM5 ≠ AM4）——这是装机第一兼容红线。</li>
+<li><strong>内存插槽</strong>：DDR4 和 DDR5 物理不通用，插错硬插会坏。</li>
+<li><strong>M.2 插槽</strong>：装 NVMe 固态，注意是 PCIe 3.0/4.0/5.0 × 几通道，<strong>CPU 直连的 M.2 通常最快</strong>。</li>
+<li><strong>SATA 接口</strong>：接 2.5" SSD、机械硬盘。</li>
+<li><strong>PCIe ×16</strong>：插显卡（注意是 4.0 还是 5.0 ×16）。</li>
+<li><strong>供电接口</strong>：24pin（主板）、8pin/4+4pin（CPU）——<strong>电源对应线材别插错</strong>（CPU 8pin ≠ 显卡 8pin，插反会烧！）。</li>
+<li><strong>前面板针脚 F_PANEL</strong>：开机键、重启键、指示灯的细针（后文详讲）。</li>
+<li><strong>后置 IO</strong>：USB 数量/版本（看颜色和标注：蓝色 USB3、红色 USB3.2 Gen2 等）、HDMI/DP 视频输出（用核显时用）、网口（2.5G 渐成主流）、音频口。</li>
+</ul>
+<p><strong>选购原则</strong>：供电相数看评测（不超频 B 系列足够）→ 接口够用（M.2 至少 2 个、USB 够多）→ 品牌与 BIOS 口碑（华硕/微星/技嘉/华擎等）。<strong>主板不影响性能上限，只影响"能不能稳定发挥 + 将来能不能扩"。</strong></p>
+<h3 id="18-2-3-内存-ram">18.2.3 内存（RAM）</h3>
+<div class="tw"><table><thead><tr><th>参数</th><th>说明</th><th>建议</th></tr></thead><tbody>
+<tr><td>代数</td><td>DDR4 / DDR5（<strong>与主板绑定，不可混用</strong>）</td><td>新装机直接 DDR5</td></tr>
+<tr><td>容量</td><td>8G / 16G / 32G / 64G</td><td>办公 16G 起；游戏/多开 32G；生产 64G+</td></tr>
+<tr><td>频率</td><td>如 6000MHz</td><td>DDR5 上 6000 左右是甜点</td></tr>
+<tr><td>时序</td><td>如 CL30</td><td>同频下 CL 越小越好</td></tr>
+<tr><td>通道</td><td>单/双通道</td><td><strong>两条组双通道，性能差距可达 20%+</strong></td></tr>
+</tbody></table></div>
+<p><strong>双通道法则</strong>：两条内存插主板 2、4 槽（离 CPU 第二近和第四近），具体看主板标注（DIMM_A2/B2）。四条插满可能降频，看主板 QVL 兼容列表。</p>
+<p><strong>XMP/EXPO</strong>：内存的"官方超频档案"，<strong>默认不开</strong>，进 BIOS 一键打开才能跑到标称频率（否则按 4800 保守频率跑）。</p>
+<h3 id="18-2-4-硬盘-速度与容量的家">18.2.4 硬盘（速度与容量的家）</h3>
+<div class="tw"><table><thead><tr><th>类型</th><th>接口</th><th>顺序速度</th><th>用途</th></tr></thead><tbody>
+<tr><td>NVMe SSD</td><td>M.2</td><td>3000-14000MB/s</td><td><strong>系统盘首选</strong></td></tr>
+<tr><td>SATA SSD</td><td>2.5"</td><td>~550MB/s</td><td>副盘、老机升级</td></tr>
+<tr><td>HDD 机械</td><td>3.5"</td><td>100-280MB/s</td><td>仓库盘（存视频/备份）</td></tr>
+</tbody></table></div>
+<p><strong>看穿的参数</strong>：</p>
+<ul>
+<li><strong>颗粒</strong>：TLC 主流够用，QLC 尽量避开系统盘（一旦 SLC 缓存写满，速度掉到 100MB/s 以下）。</li>
+<li><strong>DRAM 缓存</strong>：有独立缓存的盘性能更稳（看评测，别只看广告"高速"）。</li>
+<li><strong>缓外速度 / 温度</strong>：好盘缓外仍 1000MB/s+；便宜的盘缓外掉到 U 盘水平。PCIe 4.0 盘注意加散热片。</li>
+<li>品牌参考：三星/致态/西数/铠侠/英睿达等，看具体型号评测（同品牌的不同型号天差地别）。</li>
+</ul>
+<p><strong>容量建议</strong>：系统盘 1TB 起步（512G 很快满），仓库盘按需 2-4TB HDD。</p>
+<h3 id="18-2-5-显卡-gpu">18.2.5 显卡（GPU）</h3>
+<p><strong>型号解读</strong>（以 NVIDIA 为例）：RTX 4070 Ti SUPER → 40=代，70=档位（60/70/80/90 越高越强），Ti/SUPER=增强版。AMD：RX 7800 XT 类似逻辑。</p>
+<p><strong>关键点</strong>：</p>
+<ul>
+<li><strong>显存</strong>：容量（8G/12G/16G+）+ 位宽。2K 游戏建议 12G+，4K 游戏/AI 建议 16G+。</li>
+<li><strong>功耗</strong>：直接决定电源功率（后文算）。中高端卡 200-450W。</li>
+<li><strong>长度</strong>：35cm 级大卡<strong>先量机箱限长</strong>！</li>
+<li><strong>供电接口</strong>：8pin ×1/2/3 或新 12V-2×6（12VHPWR 改良版）——电源必须带对应线，转接线慎用。</li>
+<li><strong>公版/非公</strong>：非公=各家自己的散热和频率设计，看评测选（散热规模、噪音、售后）。</li>
+<li><strong>矿卡鉴别</strong>：低于市场价太多的"仅拆封/女士自用"卡要警惕；到手查 GPU-Z 参数、烤机看温度与稳定性、看 PCB 有无返修痕迹。</li>
+</ul>
+<p><strong>不玩游戏还要显卡吗</strong>：剪视频/AI/多屏需要；纯办公核显足够（还能省几百瓦功耗）。</p>
+<h3 id="18-2-6-电源-整机的心脏-最不能省">18.2.6 电源（整机的心脏，最不能省）</h3>
+<p><strong>功率估算公式</strong>：</p>
+<pre><code>整机推荐电源功率 ≈ CPU 满载功耗 + 显卡满载功耗 + 100W(主板/硬盘/风扇余量) + 30% 冗余
+例：i5-14600KF(~180W) + RTX 4070(~200W) + 100W = 480W → 选 650W 电源（留余量）</code></pre>
+<p><strong>要看的</strong>：</p>
+<ul>
+<li><strong>80PLUS 认证</strong>：白牌→铜→金→白金（转换效率，越高越省电，也侧面反映用料）。</li>
+<li><strong>模组</strong>：全模组（只插要用的线，理线优雅）；直出线（便宜）。</li>
+<li><strong>单路+12V</strong>：大功率单路比多路省心。</li>
+<li><strong>品牌</strong>：海韵/振华/台达/长城/艾澎/美商海盗船等，看具体型号评测（<strong>电源是"一分钱一分货"最明显的部件</strong>）。</li>
+<li><strong>危险信号</strong>：杂牌"额定 800W"实测不如正规 500W；电源烧毁常连带主板显卡一起走。</li>
+</ul>
+<h3 id="18-2-7-散热器">18.2.7 散热器</h3>
+<div class="tw"><table><thead><tr><th></th><th>风冷</th><th>一体式水冷（AIO）</th></tr></thead><tbody>
+<tr><td>原理</td><td>塔体+风扇导热</td><td>冷头+水管+冷排</td></tr>
+<tr><td>价格</td><td>50-400 元</td><td>300-1500 元</td></tr>
+<tr><td>可靠性</td><td><strong>极高</strong>（就一个风扇会坏）</td><td>有泵和漏液风险（概率低）</td></tr>
+<tr><td>性能上限</td><td>中高端够</td><td>高端/超大机箱更强</td></tr>
+<tr><td>建议</td><td><strong>大多数人的选择</strong>（百元级双塔压 i5/R5 足够）</td><td>i9/R9 或喜欢颜值/小机箱时</td></tr>
+</tbody></table></div>
+<ul>
+<li>高度限制：机箱说明书的"CPU 散热器限高"（如 160mm）必须 ≥ 散热器高度。</li>
+<li>硅脂：薄薄一层/中间一点即可，<strong>不是越多越好</strong>；装好后别没事拆开看。</li>
+<li>原装散热器（盒装自带）：能用，但吵、温度高，预算允许换百元风冷。</li>
+</ul>
+<h3 id="18-2-8-机箱">18.2.8 机箱</h3>
+<p>选机箱 = 选<strong>尺寸 + 风道 + 颜值</strong>：</p>
+<div class="tw"><table><thead><tr><th>板型</th><th>尺寸</th><th>说明</th></tr></thead><tbody>
+<tr><td>ATX 中塔</td><td>最常见</td><td>散热好、装起来舒服</td></tr>
+<tr><td>M-ATX</td><td>紧凑一点</td><td>性价比高、主流</td></tr>
+<tr><td>ITX</td><td>最小</td><td>装起来精（受）致（罪），限制多</td></tr>
+</tbody></table></div>
+<p><strong>核对三围</strong>：显卡限长、散热限高、电源限长（ATX/SFX）。<strong>风道</strong>：前进后出/下进上出，风扇别全往外吹（会进灰+乱流）。追求静音可少装风扇+调曲线。</p>
+<hr>
+<h2 id="18-3-兼容性法则-装机不翻车核心课">18.3 兼容性法则（装机不翻车核心课）</h2>
+<p>装机的本质就一句话：<strong>每个接口都对上，每个尺寸都装得下，每个功率都供电足够。</strong></p>
+<div class="tw"><table><thead><tr><th>检查项</th><th>规则</th><th>翻车后果</th></tr></thead><tbody>
+<tr><td>① CPU ↔ 主板</td><td>插槽代数一致（LGA1700/1851/AM5…）</td><td>插不上，硬插针脚弯</td></tr>
+<tr><td>② 内存 ↔ 主板</td><td>DDR4/DDR5 与主板一致</td><td>插不进，硬插坏条</td></tr>
+<tr><td>③ 电源功率</td><td>按公式留 30% 余量</td><td>高负载黑屏重启</td></tr>
+<tr><td>④ 电源线材</td><td>CPU 8pin、显卡 8pin 数量≥需求</td><td>少一根没法点亮</td></tr>
+<tr><td>⑤ 显卡长度 ↔ 机箱</td><td>限长 ≥ 显卡长度</td><td>装不进，锯机箱（误）</td></tr>
+<tr><td>⑥ 散热高度 ↔ 机箱</td><td>限高 ≥ 散热高度</td><td>侧板盖不上</td></tr>
+<tr><td>⑦ M.2 长度</td><td>2280 为主流，看主板支持</td><td>装不上/翘起</td></tr>
+<tr><td>⑧ BIOS 版本</td><td>新 CPU 装老主板可能要刷 BIOS</td><td>点不亮，需 U 盘免 U 刷 BIOS</td></tr>
+</tbody></table></div>
+<blockquote>自查习惯：<strong>下单前把八大件写成一张表，把上表 ①-⑧ 逐项打勾</strong>。这一步花 10 分钟，省一整天。</blockquote>
+<hr>
+<h2 id="18-4-选购策略-钱花在刀刃上">18.4 选购策略（钱花在刀刃上）</h2>
+<h3 id="18-4-1-按用途选路线">18.4.1 按用途选路线</h3>
+<div class="tw"><table><thead><tr><th>用途</th><th>CPU</th><th>内存</th><th>硬盘</th><th>显卡</th><th>总价位参考</th></tr></thead><tbody>
+<tr><td>办公/网课</td><td>入门 4-6 核</td><td>16G</td><td>512G-1T</td><td>核显</td><td>2-3k</td></tr>
+<tr><td>学生全能</td><td>中端 6 核</td><td>16-32G</td><td>1T</td><td>中端独显</td><td>4-6k</td></tr>
+<tr><td>游戏主力</td><td>高频 6-8 核</td><td>32G</td><td>1T</td><td>中高端</td><td>6-10k</td></tr>
+<tr><td>剪辑/建模/AI</td><td>8 核+</td><td>32-64G</td><td>1T+仓库盘</td><td>大显存</td><td>10k+</td></tr>
+</tbody></table></div>
+<h3 id="18-4-2-预算分配心法-参考比例">18.4.2 预算分配心法（参考比例）</h3>
+<pre><code>CPU :    主板 :  内存 :  硬盘 :  显卡 :  电源+散热+机箱
+约 20% :  12%  :  8%  :  8%  : 38%  :  14%（游戏向）
+生产力向：显卡比例降低，CPU/内存比例提高</code></pre>
+<h3 id="18-4-3-避坑清单-血泪版">18.4.3 避坑清单（血泪版）</h3>
+<ul>
+<li><strong>整机陷阱</strong>："i7 级"（其实是老 i7）、"多大显存"（杂牌 4G 亮机卡）、"高速固态"（QLC 无缓存）——<strong>只认具体型号！</strong></li>
+<li><strong>洋垃圾</strong>：X99 平台上拆机 Xeon（核心多但单核差、无质保）——除非明确折腾，别碰。</li>
+<li><strong>二手交易</strong>：当面验机（CPU-Z/GPU-Z/硬盘 SMART/烤机 20 分钟）；走平台验货宝；"太便宜"= 危险信号。</li>
+<li><strong>购买时机</strong>：新品首发贵、618/双11 有活动价；内存硬盘价格波动大（涨价周期别硬买）。</li>
+<li><strong>渠道</strong>：京东自营/天猫旗舰/品牌代理 = 稳妥；拼夕夕百亿补贴要辨店铺；闲鱼拼运气。</li>
+</ul>
+<hr>
+<h2 id="18-5-装机全流程-12-步-文字图解">18.5 装机全流程（12 步·文字图解）</h2>
+<blockquote>⚠️ 全程铁律：<strong>断电操作、防静电（摸金属/戴手环）、轻拿轻放、别用蛮力、螺丝别掉进机箱</strong>。</blockquote>
+<h3 id="步骤-1-准备">步骤 1｜准备</h3>
+<ul>
+<li>工具：十字螺丝刀（带磁性最佳）、扎带、剪刀、硅脂（散热器常自带）、小手电。</li>
+<li>桌面铺软垫（主板包装盒最合适），<strong>站在水泥地/摸过暖气片后再动手</strong>（防静电）。</li>
+<li>所有部件先在桌上摆开，<strong>说明书/主板手册放旁边</strong>。</li>
+</ul>
+<h3 id="步骤-2-开箱检查">步骤 2｜开箱检查</h3>
+<ul>
+<li>核对型号与订单一致；看主板针脚有无弯曲（Intel 主板针脚在主板上，AMD 在 CPU 上）。</li>
+<li>拍照留念（保修凭证 + 万一装错好对照）。</li>
+</ul>
+<h3 id="步骤-3-安装-cpu">步骤 3｜安装 CPU</h3>
+<pre><code>① 打开主板 CPU 插座压杆/盖子
+② 看方向标记：CPU 一角有金色三角 ▲，插座对应角有三角
+③ 放平轻放（对不上=方向错了，别按！）
+④ 压下压杆（稍用力，正常有卡顿感）</code></pre>
+<blockquote>针脚歪了：<strong>别自己挑</strong>，送保修点处理。AMD AM5 是 LGA，同样轻放。</blockquote>
+<h3 id="步骤-4-安装散热器">步骤 4｜安装散热器</h3>
+<ul>
+<li><strong>风冷</strong>：先装背板/扣具 → 涂硅脂（黄豆大）→ 压上塔体 → <strong>对角线交替上紧</strong>螺丝 → 插风扇到 CPU_FAN 针（4 针）。</li>
+<li><strong>水冷</strong>：冷排先装到机箱（顶部/前置），冷头后装；泵线插 AIO_PUMP 或 CPU_FAN。</li>
+</ul>
+<h3 id="步骤-5-安装内存">步骤 5｜安装内存</h3>
+<ul>
+<li>掰开插槽卡扣 → 对准防呆缺口 → <strong>两端同时下压到"咔哒"</strong>。</li>
+<li>两条 → 插第 2、4 槽（看主板标注，优先 A2/B2）。</li>
+</ul>
+<h3 id="步骤-6-安装-m-2-固态">步骤 6｜安装 M.2 固态</h3>
+<ul>
+<li>拧下散热马甲螺丝 → 硬盘金手指对准插槽（约 30° 斜插入到底）→ 尾部螺丝固定 → 装回马甲（<strong>先撕掉马甲上的保护膜！</strong>）。</li>
+</ul>
+<h3 id="步骤-7-主板进机箱">步骤 7｜主板进机箱</h3>
+<ul>
+<li>先拧机箱铜柱（对照主板孔位，<strong>数清楚，多拧的铜柱会顶坏主板背面</strong>）。</li>
+<li>装上主板 IO 挡板（很多机箱原生自带）→ 放主板 → 拧螺丝（先全部对上再逐个收紧，<strong>别一开始就拧死</strong>）。</li>
+</ul>
+<h3 id="步骤-8-安装电源">步骤 8｜安装电源</h3>
+<ul>
+<li>风扇朝下（下置机箱，进风口有防尘网）→ 从机箱后部推入 → 拧四颗螺丝。</li>
+<li>线材规划：先接 24pin 和 CPU 8pin（<strong>这两根最难穿，先走好</strong>）。</li>
+</ul>
+<h3 id="步骤-9-安装显卡">步骤 9｜安装显卡</h3>
+<ul>
+<li>拆机箱对应槽位的挡板 → 打开 PCIe 卡扣 → 显卡金手指对准插到底（听到卡扣扣上）→ 拧螺丝固定。</li>
+<li>接供电线（8pin/12VHPWR，<strong>听到卡扣声</strong>）。<strong>重量大的卡装防坠支架</strong>。</li>
+</ul>
+<h3 id="步骤-10-接线-重点-逐根核对">步骤 10｜接线（重点！逐根核对）</h3>
+<pre><code>【电源出来的线】
+24pin ──→ 主板大宽口（唯一能插的，防呆）
+CPU 8pin/4+4pin ──→ 主板左上角（CPU_PWR，别和显卡线混！）
+显卡 8pin/12VHPWR ──→ 显卡供电口（有几口接几口）
+SATA 供电 ──→ SSD/HDD（如用）
+【机箱出来的线】
+F_PANEL 前面板 ──→ 主板右下角小针脚：
+  PWR_SW（开机）  = 两针，不分正负
+  RESET_SW（重启）= 两针，不分正负
+  PWR_LED（电源灯）= 分正负（+ 在左或按标注）
+  HDD_LED（硬盘灯）= 分正负
+  USB 3.0 大蓝口 ──→ 主板 F_USB3（防呆，别硬插）
+  USB 2.0 9 针 ──→ F_USB
+  HD_AUDIO ──→ 主板音频针（JAUD1 之类）
+【风扇线】
+CPU 风扇 → CPU_FAN（必须！否则报 CPU Fan Error）
+机箱风扇 → SYS_FAN / CHA_FAN</code></pre>
+<h3 id="步骤-11-理线">步骤 11｜理线</h3>
+<ul>
+<li>用扎带把线捆成束走背线仓；<strong>别把线卡在风扇里</strong>。</li>
+</ul>
+<h3 id="步骤-12-首次点亮-激动时刻">步骤 12｜首次点亮（激动时刻）</h3>
+<pre><code>接好电源线 → 显示器线接【显卡】（有独显别插主板！）→ 按开机键
+观察：风扇转？主板灯亮？显示器出 BIOS 画面？</code></pre>
+<p><strong>点不亮排查树</strong>：</p>
+<ol>
+<li>电源开关（机箱后部 I/O 开关）= I 位置？</li>
+<li>电源线/插排有电吗？</li>
+<li>内存重插（换槽试单条）</li>
+<li>显卡重插、供电线到位？</li>
+<li>F_PANEL 接对了吗？</li>
+<li>散热器风扇插了 CPU_FAN 吗？</li>
+<li>还不行 → 最小系统法：只留 CPU+1 条内存+电源，逐个加回。</li>
+</ol>
+<hr>
+<h2 id="18-6-bios-uefi-设置-点亮后第一站">18.6 BIOS/UEFI 设置（点亮后第一站）</h2>
+<p>按 <code>Del</code>/<code>F2</code> 进入（开机画面有提示）。</p>
+<div class="tw"><table><thead><tr><th>设置项</th><th>作用</th><th>操作</th></tr></thead><tbody>
+<tr><td><strong>XMP/EXPO</strong></td><td>内存跑满标称频率</td><td>一键开启（找不到就翻"超频"页）</td></tr>
+<tr><td>启动顺序 Boot Order</td><td>从 U 盘启动装系统</td><td>把 USB 调到第一</td></tr>
+<tr><td>风扇曲线</td><td>静音/散热平衡</td><td>调 Fan Curve（AUTO 也行）</td></tr>
+<tr><td>安全启动 Secure Boot</td><td>Win11 要求</td><td>装 Win11 保持开启</td></tr>
+<tr><td>虚拟化 VT-x/SVM</td><td>跑虚拟机/WSL2 需要</td><td>保持开启</td></tr>
+<tr><td>更新 BIOS</td><td>新 CPU 兼容/修复 bug</td><td>官网下载 → U 盘 → BIOS 内 EZ Flash</td></tr>
+</tbody></table></div>
+<blockquote>装完系统后回来把 XMP 打开，是最容易被忘的一步——<strong>忘了=内存白买高频率</strong>。</blockquote>
+<hr>
+<h2 id="18-7-装系统-windows-11-官方流程-linux-双系统">18.7 装系统（Windows 11 官方流程 + Linux 双系统）</h2>
+<h3 id="18-7-1-制作启动盘-ventoy-神器">18.7.1 制作启动盘（Ventoy 神器）</h3>
+<ol>
+<li>官网下载 Ventoy → 插入 U 盘（8G+，会格式化）→ 一键安装。</li>
+<li>把 <strong>微软官网下载的 Win11 ISO 直接拷贝进 U 盘</strong>（不用解压不用工具）。</li>
+<li>想装 Linux？再拷个 Ubuntu/Deepin ISO 进去，<strong>一个 U 盘装所有系统</strong>。</li>
+</ol>
+<h3 id="18-7-2-windows-11-安装">18.7.2 Windows 11 安装</h3>
+<pre><code>① U 盘插机箱后置 USB → BIOS 里选 U 盘启动（或 F8 快速启动菜单）
+② 安装界面：语言 → 现在安装 → &quot;我没有产品密钥&quot;（可后激活）
+③ 版本选 专业版/家庭版 → 自定义安装
+④ 分区：选未分配空间 → 新建 → 系统会自动建 ESP/MSR/主分区
+   （想手动了解一下：ESP ~100-300M 引导区 + MSR 16M + C 盘剩余）
+⑤ 安装 → 重启（拔 U 盘）→ 开箱设置（跳过联网：Shift+F10 → oobe\bypassnro）</code></pre>
+<h3 id="18-7-3-装完系统三件事">18.7.3 装完系统三件事</h3>
+<ol>
+<li><strong>驱动</strong>：Windows 更新自动装大部分；显卡驱动去 NVIDIA/AMD 官网装最新（或官网工具）。</li>
+<li><strong>激活</strong>：正版密钥 or 学校/公司授权渠道。</li>
+<li><strong>基础软件</strong>：浏览器、压缩、解压、办公套件、图吧工具箱级别的检测工具（见资源库工具箱）。</li>
+</ol>
+<h3 id="18-7-4-linux-双系统要点">18.7.4 Linux 双系统要点</h3>
+<ul>
+<li>Win11 装好后再装 Linux（Linux 引导器能识别 Windows）。</li>
+<li>分区：Linux 建议单独 50-100G+ 空间，swap 按需（内存 ≥16G 可小）。</li>
+<li>启动项用 GRUB 管理；想默认进 Windows 可调 GRUB 默认项（<code>grub-customizer</code> 等）。</li>
+</ul>
+<hr>
+<h2 id="18-8-验机与烤机-新机必做">18.8 验机与烤机（新机必做）</h2>
+<div class="tw"><table><thead><tr><th>项目</th><th>工具</th><th>标准</th></tr></thead><tbody>
+<tr><td>CPU 稳定性/温度</td><td>OCCT / AIDA64 FPU</td><td>满载 15 分钟不黑不蓝；温度 &lt;90℃ 可接受，&gt;100℃ 要查散热</td></tr>
+<tr><td>内存</td><td>MemTest86（U 盘启动）</td><td>一轮 0 错误；XMP 开了再测一轮</td></tr>
+<tr><td>显卡</td><td>FurMark / 3DMark</td><td>温度稳定、无花屏；功耗频率符合评测</td></tr>
+<tr><td>硬盘</td><td>CrystalDiskInfo / CrystalDiskMark</td><td>SMART 正常；速度达到型号标称</td></tr>
+<tr><td>整机</td><td>3DMark / 游戏实测</td><td>分数对比同配置公开数据</td></tr>
+</tbody></table></div>
+<blockquote>新机流程：点亮 → BIOS 开 XMP → 装系统 → 驱动 → <strong>烤机 1 小时</strong> → 通过=交付。</blockquote>
+<blockquote><strong>"烤机"的意义：把 7 天内会暴露的硬件缺陷逼出来</strong>，此时还能免费换新。</blockquote>
+<hr>
+<h2 id="18-9-故障排查速查表">18.9 故障排查速查表</h2>
+<div class="tw"><table><thead><tr><th>症状</th><th>常见原因</th><th>排查顺序</th></tr></thead><tbody>
+<tr><td>按开机键没反应</td><td>电源开关/插排/跳线</td><td>电源 IO 开关 → 插排 → F_PANEL → 电源短接测试</td></tr>
+<tr><td>风扇转但黑屏</td><td>内存/显卡/显示器线</td><td>内存重插换槽 → 显示器线接显卡 → 换线</td></tr>
+<tr><td>反复重启</td><td>电源不足/内存不稳/温度</td><td>关 XMP → 测电源 → 查温度</td></tr>
+<tr><td>蓝屏（BSOD）</td><td>驱动/内存/系统</td><td>记错误码 → 更新驱动 → 内存测试</td></tr>
+<tr><td>玩游戏黑屏重启</td><td>电源峰值不够/显卡供电</td><td>换更大电源/检查供电线插紧</td></tr>
+<tr><td>温度高声音大</td><td>散热器没装好/硅脂干了/风道差</td><td>重装散热 → 换硅脂 → 理风道</td></tr>
+<tr><td>开机进 BIOS 不进系统</td><td>启动顺序/硬盘掉盘</td><td>检查硬盘识别 → 启动顺序 → 引导修复</td></tr>
+<tr><td>用一会儿卡死</td><td>硬盘掉速/内存错误/过热</td><td>SMART 检查 → 内存测试 → 温度监控</td></tr>
+</tbody></table></div>
+<blockquote>排查心法：<strong>先软件后硬件、先简单后复杂、先替换后深入</strong>。每次只动一个变量。</blockquote>
+<hr>
+<h2 id="18-10-升级与维护-让机器多活-3-年">18.10 升级与维护（让机器多活 3 年）</h2>
+<ul>
+<li><strong>清灰</strong>：每 6-12 个月（吹气球/软刷/压缩空气），断电操作；笔记本更要勤。</li>
+<li><strong>换硅脂</strong>：2-3 年一次（温度明显高了再换也行），拆装散热器时顺手。</li>
+<li><strong>加内存/换硬盘</strong>：最划算的升级；换系统盘用克隆工具（如 DiskGenius/傲梅）免重装。</li>
+<li><strong>BIOS 更新</strong>：不是必需，除非新 CPU 兼容/修复安全问题。</li>
+<li><strong>系统维护</strong>：C 盘留 20% 以上空闲；软件装 D 盘习惯；定期备份重要数据（3-2-1 原则）。</li>
+</ul>
+<hr>
+<h2 id="18-11-特殊形态-笔记本-迷你主机-二手">18.11 特殊形态：笔记本 / 迷你主机 / 二手</h2>
+<ul>
+<li><strong>笔记本</strong>：不可组装，选机看——CPU 型号后缀（H 高性能/U 低压）、屏幕（高刷+高色域）、散热规模（双风扇双热管+）、接口。<strong>同样型号不同配置差价大，看具体配置单。</strong></li>
+<li><strong>迷你主机</strong>：核显办公神器（N100/7840HS 类），能挂显示器背后；注意散热与扩展口。</li>
+<li><strong>二手</strong>：值得买的情形=预算紧张+懂验机；验机三件套（CPU-Z 看参数、CrystalDiskInfo 看通电时间、烤机看稳定性）。</li>
+</ul>
+<hr>
+<h2 id="18-12-自检清单-学完打勾">18.12 自检清单（学完打勾）</h2>
+<ul>
+<li>[ ] 能说出八大件各自的作用和 2 个关键参数</li>
+<li>[ ] 能用公式估算整机电源功率</li>
+<li>[ ] 能在下单前完成 8 条兼容性检查</li>
+<li>[ ] 能背出装机 12 步的骨架（CPU→散热→内存→M.2→进箱→电源→显卡→接线→点亮）</li>
+<li>[ ] 能说出 F_PANEL 四组线的名字与正负规则</li>
+<li>[ ] 知道 XMP/EXPO 在哪开、不开的后果</li>
+<li>[ ] 会用 Ventoy 做启动盘并装完一台 Windows</li>
+<li>[ ] 能说出烤机四件套（CPU/内存/显卡/硬盘）和各自工具</li>
+<li>[ ] 给一个"点不亮"的机器，能按排查树走完 7 步</li>
+</ul>
+<blockquote>👉 <strong>视频跟练</strong>：打开 App 首页 →「🌐 全网学习资源库」→ 装机区，按播放量挑 2-3 个完整装机实录（建议 30 分钟以上的全程实录），对照本章流程看一遍——理论×影像=肌肉记忆。<strong>热门教程已下载到 App 本地：带「📥 已离线」的点击「▶ 本地」即可离线观看，无需网络。</strong></blockquote>
+<blockquote>👉 <strong>配套实操</strong>：本章 + 实训室「机房管理」场景 + 第 17 章机房体系，构成"从一台机到一间房"的完整能力。</blockquote>
+</div>
+</body>
+</html>

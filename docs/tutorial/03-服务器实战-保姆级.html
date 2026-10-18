@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>第 3 章 · 服务器实战：把 Linux 变成一台真正干活的服务器 - 知识公社</title>
+<meta name="description" content="第 3 章 · 服务器实战：把 Linux 变成一台真正干活的服务器：云计算竞赛学习项目文档。">
+<meta name="theme-color" content="#0e1b33">
+<link rel="stylesheet" href="../../style.css">
+<style>
+body{margin:0;background:#f3f6fb;color:#16233c;line-height:1.8;
+font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.doc{max-width:860px;margin:0 auto;padding:26px 18px 80px}
+.doc h1{font-size:26px;border-bottom:2px solid #2b5cd9;padding-bottom:10px;margin:6px 0 20px}
+.doc h2{font-size:21px;margin:30px 0 12px;border-left:5px solid #2b5cd9;padding-left:10px}
+.doc h3{font-size:17px;margin:22px 0 10px;color:#12408f}
+.doc h4{font-size:15px;margin:18px 0 8px;color:#3b5a86}
+.doc p{margin:10px 0}
+.doc ul,.doc ol{padding-left:24px;margin:10px 0}
+.doc li{margin:5px 0}
+.doc a{color:#12408f}
+.doc code{background:#eaf0fa;color:#0b3b86;padding:2px 6px;border-radius:4px;
+font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.doc pre{background:#16233c;color:#e6edf3;padding:14px 16px;border-radius:8px;overflow-x:auto}
+.doc pre code{background:none;color:#e6edf3;padding:0}
+.doc blockquote{margin:12px 0;padding:10px 14px;background:#eaf0fa;border-left:4px solid #2b5cd9;
+border-radius:0 6px 6px 0;color:#33405c}
+.doc table,.tw table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;
+background:#fff;box-shadow:0 1px 3px rgba(22,35,60,.08)}
+.doc th,.doc td{border:1px solid #dde5f0;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#eaf0fa;font-weight:700}
+.doc hr{border:0;border-top:1px solid #dde5f0;margin:24px 0}
+.back{display:inline-block;margin-bottom:14px;color:#2b5cd9;text-decoration:none;font-size:14px}
+@media(max-width:620px){.doc{font-size:15px;padding:18px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="doc">
+<a class="back" href="../../index.html">← 返回项目首页</a>
+<h1 id="第-3-章-服务器实战-把-linux-变成一台真正干活的服务器">第 3 章 · 服务器实战：把 Linux 变成一台真正干活的服务器</h1>
+<blockquote>前两章你学会了"操作"和"连接"。这一章开始<strong>做事</strong>：搭网站、跑服务、配数据库、做定时任务。</blockquote>
+<blockquote>学完本章，你就拥有了"一个人搭出小型网站后端"的能力——这已经是初级运维工程师的看家本领。</blockquote>
+<blockquote>预计学习时间：2-3 周。</blockquote>
+<hr>
+<h2 id="3-1-先想清楚-服务器-到底是什么形态">3.1 先想清楚："服务器"到底是什么形态？</h2>
+<p>一台服务器上通常同时跑着好几样东西，它们<strong>分工合作</strong>：</p>
+<pre><code>用户浏览器
+    │  (通过 80/443 端口访问)
+    ▼
+┌─────────────┐
+│   Nginx     │  ← &quot;前台接待员&quot;：接收所有访客请求
+└──────┬──────┘
+       │ 静态文件它自己直接给；动态请求转给&quot;后厨&quot;
+       ▼
+┌─────────────┐
+│  你的程序    │  ← &quot;后厨&quot;（Python/Go/Java 写的应用）
+└──────┬──────┘
+       │ 需要存数据时
+       ▼
+┌─────────────┐
+│  数据库      │  ← &quot;仓库&quot;（MySQL/PostgreSQL）
+└─────────────┘</code></pre>
+<p><strong>这一章，我们要把"接待员、后厨、仓库"都亲手装一遍。</strong> 这就是云计算比赛的每日训练内容，也是所有互联网公司的基本架构。</p>
+<hr>
+<h2 id="3-2-nginx-深入-从-会开-到-会配">3.2 Nginx 深入：从"会开"到"会配"</h2>
+<h3 id="3-2-1-回顾一下-第-2-章装好的">3.2.1 回顾一下（第 2 章装好的）</h3>
+<pre><code>sudo systemctl status nginx      # 确认它在跑
+curl http://localhost            # 确认能访问</code></pre>
+<h3 id="3-2-2-nginx-的配置文件在哪-怎么看">3.2.2 Nginx 的配置文件在哪、怎么看</h3>
+<pre><code>ls /etc/nginx/                   # 看 nginx 的&quot;配置大本营&quot;</code></pre>
+<p>关键文件：</p>
+<pre><code>/etc/nginx/nginx.conf            ← 主配置（一般不直接改）
+/etc/nginx/sites-available/      ← 可用站点配置（我们在这写）
+/etc/nginx/sites-enabled/        ← 已启用站点（能跑的配置）
+/var/www/html/                   ← 网站文件默认放这里
+/var/log/nginx/                  ← 日志（access.log 访问日志 / error.log 错误日志）</code></pre>
+<blockquote>设计妙处：<code>sites-available</code>（仓库）和 <code>sites-enabled</code>（货架）分开。写好的站点先放"仓库"，想要它上线，就在"货架"里建一个快捷方式（软链接）。<strong>下线一个网站=删快捷方式，文件不丢。</strong></blockquote>
+<h3 id="3-2-3-写一个完整站点配置-手把手">3.2.3 写一个完整站点配置（手把手）</h3>
+<p><strong>目标</strong>：搭一个"公司官网"，域名叫 <code>mycompany.local</code>（本地测试用），网站文件放 <code>/var/www/mycompany</code>。</p>
+<p><strong>第 1 步：建网站目录和首页</strong></p>
+<pre><code>sudo mkdir -p /var/www/mycompany
+sudo nano /var/www/mycompany/index.html</code></pre>
+<p>写入：</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;title&gt;我的公司&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;欢迎来到 ABC 公司&lt;/h1&gt;
+  &lt;p&gt;这是 Nginx 虚拟主机配置的练习站点。&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p><strong>第 2 步：写站点配置</strong></p>
+<pre><code>sudo nano /etc/nginx/sites-available/mycompany.conf</code></pre>
+<p>写入（<strong>每一行都给你注释，请一个词一个词读</strong>）：</p>
+<pre><code>server {
+    listen 80;                        # 监听 80 端口（接收 HTTP 访问）
+    server_name mycompany.local;      # 这个站点响应哪个域名
+    root /var/www/mycompany;          # 网站文件放在哪里
+    index index.html;                 # 默认首页文件名
+
+    location / {                      # &quot;当访客访问 / （根路径）时……&quot;
+        try_files $uri $uri/ =404;    # &quot;先找这个文件，找不到再找同名目录，都没有就报 404&quot;
+    }
+
+    access_log /var/log/nginx/mycompany.access.log;   # 访问日志记到哪
+    error_log  /var/log/nginx/mycompany.error.log;    # 错误日志记到哪
+}</code></pre>
+<blockquote>看不懂 <code>try_files</code> 没关系——先记住这是"静态网站的标准三行"，以后每个站点都这么写。</blockquote>
+<p><strong>第 3 步：启用站点（做快捷方式）</strong></p>
+<pre><code>sudo ln -s /etc/nginx/sites-available/mycompany.conf /etc/nginx/sites-enabled/</code></pre>
+<p>（<code>ln -s 源文件 快捷方式位置</code> = 创建软链接，像 Windows 的"桌面快捷方式"）</p>
+<p><strong>第 4 步：测试语法 → 重启 → 验证（标准四步，背下来）</strong></p>
+<pre><code>sudo nginx -t                    # ① 测试配置语法（必须养成习惯！）
+# 输出 syntax is ok / test is successful → 通过
+sudo systemctl reload nginx      # ② 重新加载（reload 比 restart 更平滑，不断已有连接）</code></pre>
+<p><strong>第 5 步：本地测试"假装访问这个域名"</strong></p>
+<pre><code>curl -H &quot;Host: mycompany.local&quot; http://localhost</code></pre>
+<p>→ 应返回你写的"欢迎来到 ABC 公司"页面。</p>
+<p><strong>真正用浏览器访问</strong>：编辑你电脑的 hosts 文件（模拟 DNS）：</p>
+<ul>
+<li>Windows：<code>C:\Windows\System32\drivers\etc\hosts</code>（用管理员权限的记事本编辑）</li>
+<li>加一行：<code>你的服务器IP  mycompany.local</code></li>
+<li>浏览器访问 <code>http://mycompany.local</code> → 成功！</li>
+</ul>
+<blockquote><strong>🏆 你刚刚配置了一个"虚拟主机"——同一台服务器、同一个 80 端口，根据访问的域名返回不同的网站。</strong> 全世界几十万个网站共用服务器的原理就是这个。世界赛的 Nginx/HAProxy 考点从这里发芽。</blockquote>
+<h3 id="3-2-4-公司要多个网站-再配一个">3.2.4 "公司要多个网站"——再配一个</h3>
+<p>重复刚才的流程：建 <code>/var/www/blog</code> 目录、写 <code>blog.conf</code>（server_name 用 <code>blog.local</code>）、软链、<code>nginx -t</code>、<code>reload</code>、hosts 加一行 → 两个网站并存。<strong>体会"一份软件、多份配置"的复用思维。</strong></p>
+<h3 id="3-2-5-看日志-网站出问题时它在-说话">3.2.5 看日志：网站出问题时它在"说话"</h3>
+<pre><code>sudo tail -f /var/log/nginx/mycompany.access.log</code></pre>
+<p>另开一个窗口 <code>curl -H "Host: mycompany.local" http://localhost</code>，你能<strong>实时看到</strong>访问记录滚出来：</p>
+<pre><code>127.0.0.1 - - [16/Sep/2026:11:00:01 +0800] &quot;GET / HTTP/1.1&quot; 200 615 &quot;-&quot; &quot;curl/7.81.0&quot;</code></pre>
+<p>逐段读：谁访问的（IP）→ 什么时间 → 请求了什么 → <strong>状态码（200 成功/404 没找到）</strong> → 返回了多少字节。</p>
+<pre><code>sudo tail -f /var/log/nginx/mycompany.error.log    # 出错时看这个</code></pre>
+<p><strong>排错铁律：网站不正常 → 先看这两个日志。</strong> 90% 的问题日志里写得明明白白。</p>
+<h3 id="出错了怎么办-nginx-高频-5-坑">【出错了怎么办——Nginx 高频 5 坑】</h3>
+<ol>
+<li><strong><code>nginx: [emerg] unknown directive</code></strong>：配置写错（拼写/少了分号 <code>;</code>）。<code>nginx -t</code> 会指出第几行。</li>
+<li><strong>访问到的是"Welcome to nginx"而不是你的页面</strong>：你的 server_name 没匹配上。检查①域名拼写②hosts 文件③有没有 reload。</li>
+<li><strong>改完配置没生效</strong>：忘了 reload。<strong>"改配置→nginx -t→reload→验证"是肌肉记忆。</strong></li>
+<li><strong>403 Forbidden</strong>：网站文件的"读权限"不对，或目录里没有 index.html。</li>
+<li><strong>404 Not Found</strong>：路径不对——<code>root</code> 配置的目录里真的有你想要的文件吗？<code>ls</code> 去看。</li>
+</ol>
+<hr>
+<h2 id="3-3-让服务器-跑程序-部署一个后端服务">3.3 让服务器"跑程序"：部署一个后端服务</h2>
+<p>静态网页只是开始。真正干活的是<strong>后端程序</strong>（接收请求、处理业务、返回数据）。我们用 Python 写一个超小服务，把"后端"这个东西摸清楚。</p>
+<h3 id="3-3-1-写一个最简单的-api-服务">3.3.1 写一个最简单的 API 服务</h3>
+<pre><code>sudo apt install -y python3-pip
+mkdir -p ~/apps &amp;&amp; cd ~/apps
+nano memo.py</code></pre>
+<p>写入：</p>
+<pre><code>#!/usr/bin/env python3
+# 一个简易&quot;备忘录&quot;API：把内容存到文件里
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, parse_qs
+
+MEMO_FILE = &quot;/home/student/apps/memo.txt&quot;   # 注意改成你的用户名！
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        query = parse_qs(urlparse(self.path).query)
+        action = query.get(&quot;action&quot;, [&quot;list&quot;])[0]
+        if action == &quot;add&quot;:
+            text = query.get(&quot;text&quot;, [&quot;&quot;])[0]
+            if text:
+                with open(MEMO_FILE, &quot;a&quot;, encoding=&quot;utf-8&quot;) as f:
+                    f.write(text + &quot;\n&quot;)
+                self._reply(&quot;已添加: &quot; + text)
+            else:
+                self._reply(&quot;用法: ?action=add&amp;text=要记的内容&quot;)
+        else:  # list
+            try:
+                with open(MEMO_FILE, encoding=&quot;utf-8&quot;) as f:
+                    self._reply(&quot;备忘录:\n&quot; + f.read())
+            except FileNotFoundError:
+                self._reply(&quot;还没有备忘录&quot;)
+
+    def _reply(self, text):
+        data = text.encode(&quot;utf-8&quot;)
+        self.send_response(200)
+        self.send_header(&quot;Content-Type&quot;, &quot;text/plain; charset=utf-8&quot;)
+        self.end_headers()
+        self.wfile.write(data)
+
+HTTPServer((&quot;0.0.0.0&quot;, 8000), Handler).serve_forever()</code></pre>
+<p>（看不懂每行没关系——<strong>这是"看得见摸得着"的第一步</strong>：知道一个后端服务长什么样。以后你会学真正的框架。）</p>
+<h3 id="3-3-2-运行并访问">3.3.2 运行并访问</h3>
+<pre><code>python3 memo.py &amp;</code></pre>
+<ul>
+<li>末尾的 <code>&amp;</code> = "扔到后台运行"（不霸占你的终端）</li>
+<li>现在测试：</li>
+</ul>
+<pre><code>curl &quot;http://localhost:8000/?action=add&amp;text=今天学会了nginx&quot;
+curl &quot;http://localhost:8000/?action=list&quot;</code></pre>
+<p>→ 第二条应显示你刚添加的内容。<strong>你的程序在 8000 端口活过来啦。</strong></p>
+<h3 id="3-3-3-把它变成-正规服务-systemd-实战">3.3.3 把它变成"正规服务"（systemd 实战）</h3>
+<p><code>python3 xxx.py &amp;</code> 的方式很业余：一关窗口就死、重启不自动运行。正规做法是用 systemd 托管：</p>
+<pre><code>sudo nano /etc/systemd/system/memo.service</code></pre>
+<p>写入：</p>
+<pre><code>[Unit]
+Description=Memo API Service
+After=network.target
+
+[Service]
+User=student
+WorkingDirectory=/home/student/apps
+ExecStart=/usr/bin/python3 /home/student/apps/memo.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+<p>逐段解释（<strong>这是所有 systemd 服务的通用模板</strong>）：</p>
+<ul>
+<li><code>[Unit]</code>：说明和依赖（<code>After</code> = 网络就绪后再启动）</li>
+<li><code>[Service]</code>：怎么跑这个程序。<code>Restart=always</code> = <strong>崩了自动重启</strong>（生产环境必备）</li>
+<li><code>[Install]</code>：<code>WantedBy=multi-user.target</code> = 允许设置开机自启（固定写法）</li>
+<li>⚠️ 注意 <code>User=student</code> 要改成你的用户名（<code>whoami</code> 查看）</li>
+</ul>
+<p>然后：</p>
+<pre><code>sudo systemctl daemon-reload         # 告诉 systemd &quot;有新服务注册了&quot;（改 unit 文件后必做）
+sudo systemctl start memo            # 启动
+sudo systemctl status memo           # 看状态 → active (running)
+sudo systemctl enable memo           # 开机自启
+curl &quot;http://localhost:8000/?action=list&quot;   # 验证</code></pre>
+<p><strong>关键理解</strong>：这就是"部署一个服务"的标准姿势。<strong>你以后部署的 nginx、数据库、比赛的应用……全是这个套路。</strong></p>
+<h3 id="3-3-4-用-nginx-给它当-前台-反向代理-比赛高频考点">3.3.4 用 Nginx 给它当"前台"（反向代理——比赛高频考点！）</h3>
+<p>现在服务在 8000 端口。用户不可能记端口，我们让 Nginx 把 <code>80 端口的 /memo/ 路径</code> 转给 8000 的服务：</p>
+<pre><code>sudo nano /etc/nginx/sites-available/mycompany.conf</code></pre>
+<p>把 <code>location /</code> 那个块改成（<strong>加一段新的 location</strong>）：</p>
+<pre><code>    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location /memo/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }</code></pre>
+<ul>
+<li><code>proxy_pass</code> = <strong>"把请求转发给谁"</strong>。这就是<strong>反向代理</strong>。</li>
+<li><code>proxy_set_header ...</code> = 把访客真实信息传给后端（固定写法，照抄）</li>
+<p><strong>四步走</strong>：</p>
+</ul>
+<pre><code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx
+curl -H &quot;Host: mycompany.local&quot; &quot;http://localhost/memo/?action=list&quot;</code></pre>
+<p>→ 通过 80 端口（Nginx）访问到了 8000 端口（Python）的服务！</p>
+<p><strong>为什么这是重点？</strong> 因为"外部端口 80/443 进 → Nginx 转发 → 内部各种服务"是全世界的标准架构。<strong>世界赛 Module A 的 A12（HAProxy 反向代理与负载均衡）、韩国赛的 Ingress/ALB 考点，本质都是这件事的变体。</strong></p>
+<hr>
+<h2 id="3-4-数据库初体验-装一台-mysql">3.4 数据库初体验：装一台 MySQL</h2>
+<p>几乎每个系统都要存数据。我们来真的装一台数据库，并完成"建库、建表、增删改查"。</p>
+<h3 id="3-4-1-安装与管理">3.4.1 安装与管理</h3>
+<pre><code>sudo apt install -y mysql-server
+sudo systemctl status mysql        # 确认 active (running)
+sudo mysql                          # 用管理员身份进入数据库（欢迎来到&quot;数据库命令行&quot;）</code></pre>
+<p>你会看到提示符变成 <code>mysql&gt;</code> —— 这是<strong>MySQL 自己的命令行</strong>（和 bash 不是一个东西，<code>exit</code> 退出）。</p>
+<h3 id="3-4-2-五板斧-建库-建表-增-查-删">3.4.2 五板斧：建库、建表、增、查、删</h3>
+<p>在 <code>mysql&gt;</code> 里逐条执行：</p>
+<pre><code>-- 建一个数据库（每个系统一个&quot;仓库&quot;）
+CREATE DATABASE company CHARACTER SET utf8mb4;
+
+-- 切进去用它
+USE company;
+
+-- 建一张&quot;员工表&quot;（表=一张 Excel 表，列有类型）
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,     -- 编号，自动增长，主键（唯一标识）
+    name VARCHAR(50) NOT NULL,             -- 姓名，最多50字符，不能为空
+    dept VARCHAR(50),                      -- 部门
+    salary INT                             -- 工资
+);
+
+-- 插入三行数据
+INSERT INTO employees (name, dept, salary) VALUES
+(&#x27;张三&#x27;, &#x27;技术部&#x27;, 15000),
+(&#x27;李四&#x27;, &#x27;市场部&#x27;, 12000),
+(&#x27;王五&#x27;, &#x27;技术部&#x27;, 18000);
+
+-- 查询！（SQL 的灵魂）
+SELECT * FROM employees;                        -- 查全部
+SELECT name, salary FROM employees WHERE dept = &#x27;技术部&#x27;;   -- 带条件查
+SELECT dept, AVG(salary) FROM employees GROUP BY dept;      -- 分组算平均 ★ 比赛常见</code></pre>
+<p>输出（第三条）：</p>
+<pre><code>+--------+-------------+
+| dept   | AVG(salary) |
++--------+-------------+
+| 技术部 |    16500.0  |
+| 市场部 |    12000.0  |
++--------+-------------+</code></pre>
+<h3 id="3-4-3-建个-应用专用账号-安全实践-也是比赛考点">3.4.3 建个"应用专用账号"（安全实践，也是比赛考点）</h3>
+<p>生产上<strong>绝不用 root 连数据库</strong>。要给应用建专属低权限账号：</p>
+<pre><code>CREATE USER &#x27;memo_user&#x27;@&#x27;localhost&#x27; IDENTIFIED BY &#x27;Memo123!&#x27;;
+GRANT SELECT, INSERT, UPDATE, DELETE ON company.* TO &#x27;memo_user&#x27;@&#x27;localhost&#x27;;
+FLUSH PRIVILEGES;     -- 让权限立即生效（固定写法）
+exit</code></pre>
+<p><strong>解释</strong>：</p>
+<ul>
+<li><code>'memo_user'@'localhost'</code> = "只允许从本机登录的 memo_user"</li>
+<li><code>GRANT ... ON company.*</code> = 只给 company 库的增删改查权，别的库一律不给——<strong>最小权限原则</strong>（安全的核心思想）</li>
+</ul>
+<p>验证用新账号登录：</p>
+<pre><code>mysql -u memo_user -p    # 输入刚才设的密码 Memo123!
+mysql&gt; USE company; SELECT COUNT(*) FROM employees;   # 能查
+mysql&gt; DROP DATABASE company;                          # 试试能不能删库 → 应该被拒绝！(权限不足)</code></pre>
+<p><strong>看到"权限不足"的那一刻，你就理解了"权限管理"的意义。</strong></p>
+<h3 id="3-4-4-备份数据库-比赛评分点-实务必备">3.4.4 备份数据库（比赛评分点，实务必备）</h3>
+<pre><code># 备份（导出整个库到文件）
+mysqldump -u root company &gt; ~/apps/company-$(date +%Y%m%d).sql
+
+# 恢复（把备份灌回去）
+mysql -u root -e &quot;CREATE DATABASE company2&quot;
+mysql -u root company2 &lt; ~/apps/company-*.sql
+mysql -u root -e &quot;SELECT COUNT(*) FROM company2.employees&quot;   # 应该还是 3 条</code></pre>
+<hr>
+<h2 id="3-5-定时任务-crontab-让服务器自己干活">3.5 定时任务 crontab：让服务器自己干活</h2>
+<h3 id="3-5-1-什么是-crontab">3.5.1 什么是 crontab？</h3>
+<p>让命令<strong>按时间表自动重复执行</strong>：每天凌晨备份、每小时同步、每 5 分钟检查状态……</p>
+<blockquote>比喻：给服务器请了个"闹钟管家"。你写好"几点干什么"，它到点自动干。</blockquote>
+<h3 id="3-5-2-时间格式-背这张图">3.5.2 时间格式（背这张图）</h3>
+<pre><code>┌──────── 分钟 (0-59)
+│ ┌────── 小时 (0-23)
+│ │ ┌──── 日 (1-31)
+│ │ │ ┌── 月 (1-12)
+│ │ │ │ ┌ 星期 (0-7，0和7都代表周日)
+│ │ │ │ │
+* * * * *  要执行的命令</code></pre>
+<p>例子：</p>
+<pre><code>30 2 * * *      → 每天凌晨 2:30
+0 * * * *       → 每小时整点
+*/5 * * * *     → 每 5 分钟（*/5 表示&quot;每5个单位&quot;）
+0 9 * * 1-5     → 周一到周五早上 9 点</code></pre>
+<h3 id="3-5-3-实战-每天自动备份-把第-1-章的脚本升级">3.5.3 实战：每天自动备份（把第 1 章的脚本升级）</h3>
+<pre><code>crontab -e        # 第一次会让你选编辑器，选 nano（对应数字）</code></pre>
+<p>在文件末尾加一行（<strong>注意：crontab 里的命令要用绝对路径！</strong>）：</p>
+<pre><code>0 3 * * * /home/student/apps/backup.sh &gt;&gt; /home/student/apps/backup.log 2&gt;&amp;1</code></pre>
+<p>（每天凌晨 3 点跑备份脚本，日志追加到 backup.log。<code>&gt;&gt;</code> 和 <code>2&gt;&amp;1</code> 是第 1 章学的重定向——<strong>它们在这里是为了"留下执行记录"，不然任务没跑你都不知道</strong>）</p>
+<p>确保 backup.sh 存在（第 1 章写的）：</p>
+<pre><code># 如果不存在，重建一个：
+cat &gt; ~/apps/backup.sh &lt;&lt; &#x27;EOF&#x27;
+#!/bin/bash
+mkdir -p /home/student/backups
+tar -czf /home/student/backups/apps-$(date +%Y%m%d).tar.gz /home/student/apps 2&gt;/dev/null
+find /home/student/backups -name &quot;*.tar.gz&quot; -mtime +7 -delete   # 只保留最近7天
+echo &quot;备份完成 $(date)&quot;
+EOF
+chmod +x ~/apps/backup.sh</code></pre>
+<p>查看与管理：</p>
+<pre><code>crontab -l          # 看当前有哪些定时任务</code></pre>
+<p><strong>比赛关联</strong>：世界赛 Module A 的 A10-02 评分点就是"检查备份脚本"——<strong>你今天写的东西，就是比赛题的一个答案。</strong></p>
+<hr>
+<h2 id="3-6-本章毕业项目-搭一个-个人小站-完整系统">3.6 本章毕业项目：搭一个"个人小站"完整系统</h2>
+<p><strong>要求</strong>：把本章学的全用上，10 个要求全部完成：</p>
+<ol>
+<li>一个静态首页：<code>http://你的IP/</code>，显示自我介绍（用 Nginx 站点配置）</li>
+<li>一个备忘 API：<code>/memo/?action=add&amp;text=xxx</code> 能记东西、<code>?action=list</code> 能看（systemd 托管）</li>
+<li>数据库：建 <code>notes</code> 库和 <code>notes</code> 表（学号、内容、时间），用专属账号 <code>notes_user</code> 访问</li>
+<li>定时任务：每天早上 6 点备份数据库到 <code>~/backups/</code></li>
+<li>日志：能随时说出"今天有谁访问过我的网站"（看 access.log）</li>
+<li>防火墙：只放行 22/80/443 端口</li>
+<li>（加分）给站点配第二个域名 <code>blog.local</code>，打开是完全不同的页面</li>
+<li>（加分）用 curl 假装浏览器访问，验证每个路径的状态码都是 200</li>
+<li>（加分）把整个项目的配置、脚本、说明整理成一个文件夹 <code>~/my-project/</code>，打包备份</li>
+<li>写一份 20 行的"操作手册" <code>~/my-project/README.md</code>：记录你部署的每一步命令（<strong>从今天起养成"做了什么都记下来"的习惯——这是高手的共同习惯</strong>）</li>
+</ol>
+<h3 id="本章自我检验">【本章自我检验】</h3>
+<ul>
+<li>[ ] 我能独立写 Nginx 站点配置并启用（不抄教程写出大致框架）</li>
+<li>[ ] 我理解"语法检查→reload→验证"的运维节奏</li>
+<li>[ ] 我会用 systemd 把一个程序变成正式服务（含开机自启和自动重启）</li>
+<li>[ ] 我理解反向代理在做什么（能画图解释）</li>
+<li>[ ] 我会用 MySQL 建库建表、增删改查、建低权限账号、备份恢复</li>
+<li>[ ] 我会写 crontab 定时任务，知道为什么日志要重定向</li>
+<li>[ ] 我看得懂 Nginx 日志的每一段</li>
+<li>[ ] （重要）我遇到问题会先看日志，而不是瞎猜</li>
+</ul>
+<p><strong>全勾 → 你已经是"能独立干活"的人了。</strong> 从"什么都不会"到"能搭起一个小系统"，你只用了三章。剩下的路（云计算进阶篇：DNS 服务器、HTTPS 证书、负载均衡、故障排查、云平台、容器）都是这条路的自然延伸。</p>
+</div>
+</body>
+</html>
