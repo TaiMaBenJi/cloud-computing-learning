@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Linux 每日计划 · 21 天打地基 - 知识公社</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.day{border:1px solid var(--line);border-radius:8px;background:var(--card);margin:14px 0;overflow:hidden}
+.day.done{opacity:.62}
+.day-h{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fbf6ec;border-bottom:1px solid var(--line);cursor:pointer}
+.day-h .dn{flex:none;width:38px;height:38px;border-radius:8px;background:var(--red);color:#fdf6ea;
+display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:17px;font-weight:700}
+.day.done .day-h .dn{background:var(--green)}
+.day-h .dt{flex:1;min-width:0}
+.day-h .dt b{display:block;font-size:15.5px;font-family:var(--serif)}
+.day-h .dt span{font-size:12.5px;color:var(--dim)}
+.day-h .ck{flex:none;width:26px;height:26px;accent-color:var(--red)}
+.day-b{padding:4px 14px 14px}
+.cmd{background:#22201d;color:#e8e2d6;border-radius:6px;padding:10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;
+font-size:13px;line-height:1.85;overflow-x:auto;white-space:pre;margin:8px 0}
+.cmd b{color:#ffc06b;font-weight:600}
+.cmd i{color:#8fbf7f;font-style:normal}
+.cmd u{color:#7fb0d8;text-decoration:none}
+.pass-box{border-left:4px solid var(--green);background:#f3f9f4;border-radius:0 6px 6px 0;padding:10px 13px;margin:10px 0;font-size:13.5px}
+.pass-box b{color:#2c6b3f}
+.bar2{height:12px;background:#eceff3;border-radius:7px;overflow:hidden;flex:1;min-width:120px}
+.bar2 i{display:block;height:100%;background:linear-gradient(90deg,#9e2b25,#4c6b4f);border-radius:7px;transition:width .4s}
+.sticky{position:sticky;top:0;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:12px 0;box-shadow:0 2px 8px rgba(64,48,24,.08)}
+.row2{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.stat{font-family:var(--serif);font-size:13px;color:var(--dim)}
+.stat b{font-size:19px;color:var(--red-dk);margin:0 3px}
+@media print{
+  .topbar,nav.tabs,.sticky,.no-print{display:none!important}
+  body{background:#fff}
+  .day{break-inside:avoid;page-break-inside:avoid;border:1px solid #999}
+  .day-b{display:block!important}
+  .cmd{background:#f2f2f2;color:#111;border:1px solid #999}
+  .cmd b{color:#a50}.cmd i{color:#060}.cmd u{color:#06c}
+}
+</style>
+</head>
+<body>
+<div class="topbar"><span class="dot"></span><span>Linux 每日计划 · 21 天 | 零基础到敢动手拆机器 | 进度存本机 · 可打印贴墙</span></div>
+<header class="hero">
+  <div class="kicker">LINUX · 21 DAYS · TYPE IT YOURSELF</div>
+  <h1>Linux 每日计划</h1>
+  <p>21 天，每天 60–90 分钟。<b>不是看，是敲。</b>每天一张卡：今天的目标 → 必须敲会的命令 → 动手任务 → 过关自测。
+  敲完再点勾，<b>过关自测不通过就别勾</b>——骗自己没意义。</p>
+  <div class="badges"><span>零基础起步</span><span>每天 60–90 分钟</span><span>进度存本机</span><span>可打印</span><span>直通实训场</span></div>
+</header>
+<nav class="tabs">
+  <a href="https://taimabenji.github.io/knowledge-commons/learn/index.html">首页</a>
+  <a href="https://taimabenji.github.io/knowledge-commons/learn/cloud/index.html">云赛</a>
+  <a href="start.html">30天作战板</a>
+  <a href="week1.html">开蒙</a>
+  <a class="on" href="linux-plan.html">Linux计划</a>
+  <a href="sprint.html">冲刺</a>
+  <a href="sim/index.html">模拟中心</a>
+  <a href="labs/README.md">实训场</a>
+  <a href="docs/tutorial/README-教程总览.md">教程</a>
+  <a href="papers/真题题库-21套.md">真题</a>
+  <a href="resources/WSOS-2026-cloud-computing-zh.txt">官方标准</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="goal"><b>开练前先做两件事：</b>① 在你的电脑上装好 Linux（Windows 跑 <code>setup/setup-windows.ps1</code>，已有 Linux 直接看 <code>setup/README.md</code>）；
+  ② 装完跑一次体检：<code>bash setup/check-env.sh</code>，全绿再开始。<b>环境不稳，后面全是白学。</b></div>
+
+  <div class="sticky">
+    <div class="row2">
+      <div style="flex:1;min-width:180px">
+        <div class="stat">已完成 <b id="s-done">0</b>/21 天　连续 <b id="s-streak">0</b> 天　用时约 <b id="s-time">0</b> 小时</div>
+        <div class="bar2" style="margin-top:7px"><i id="s-bar" style="width:0%"></i></div>
+      </div>
+      <button class="btn" id="btn-print" type="button">🖨 打印（贴墙上）</button>
+      <button class="btn ghost" id="btn-reset" type="button">↺ 清空进度</button>
+    </div>
+    <div class="small" style="margin-top:8px">进度存在这台电脑的浏览器里（localStorage），换设备/清缓存会丢。每周至少 <code>git commit</code> 一次或打快照。</div>
+  </div>
+
+  <div id="weeks"></div>
+
+  <div class="card" style="border:2px solid #9e2b25;background:#fff8f4">
+    <p><b>🎯 21 天之后去哪？</b></p>
+    <ul class="list">
+      <li><span class="t"><b>先做 L1 验收</b> —— <code>sudo bash labs/cloudlab/grade/grade_l1.sh</code>，全绿说明基础真的过关了</span><span class="n">必做</span></li>
+      <li><span class="t"><b>然后打一场模拟赛</b> —— <a href="sim/index.html">模拟中心</a>，7 套全真卷任选，计时交卷看复盘</span><span class="n">下一步</span></li>
+      <li><span class="t"><b>边打边补</b> —— 哪一项失分，就回去读 <a href="docs/tutorial/README-教程总览.md">20 章教程</a>对应章节</span><span class="n">闭环</span></li>
+      <li><span class="t"><b>世界赛标准</b> —— <a href="resources/WSOS-2026-cloud-computing-zh.txt">WSOS 2026 官方职业标准（中文全文）</a>，八项权重就写在里面</span><span class="n">终点</span></li>
+    </ul>
+  </div>
+
+  <p class="note">本计划为<b>纯静态离线页面</b>，进度存本机，无后端、无网络请求。命令示例按 Ubuntu/Debian 系编写；用 Rocky/CentOS/openEuler 时把 <code>apt</code> 换成 <code>dnf</code>、把服务名 <code>sshd</code> 换成 <code>ssh</code> 即可。21 天只是「敢动手」的门槛，<b>到赛场水平通常需要 3 个月每天 2 小时</b>。</p>
+</div>
+
+<script>
+var DAYS = [
+{w:"第 1 周 · 会用（把系统当工具）",d:[
+ {t:"认识终端与文件系统",g:"搞清楚我在哪、这里有什么、怎么去别处",
+  c:"<b>pwd</b>            <i># 我在哪</i>\n<b>ls -la</b>         <i># 这里有什么（-a 含隐藏，-l 详细信息）</i>\n<b>ls -lh /etc</b>    <i># 目标目录 -h 人类可读大小</i>\n<b>cd /etc</b>         <i># 切目录</i>\n<b>cd -</b>            <i># 回上一个目录（超好用）</i>\n<b>cd ~</b>             <i># 回家目录</i>\n<b>file /etc/passwd</b> <i># 看清这到底是什么东西</i>",
+  k:"在 /root 下建一个 cloud-lab 文件夹和子目录 notes/scripts，进 notes 建一个 today.md，进 scripts 建一个 hello.sh，然后 <b>用一条命令把整棵树列出来</b>。",
+  p:"能闭眼打出 pwd / ls -la / cd 目标 / cd - 这四条；能解释 . 和 .. 是什么；能说清绝对路径和相对路径的区别。"},
+ {t:"读文件：cat / less / head / tail",g:"看配置是排障第一动作",
+  c:"<b>cat /etc/os-release</b>\n<b>less /etc/passwd</b>     <i># q 退出，/ 搜索，n 下一个</i>\n<b>head -20 /etc/passwd</b>\n<b>tail -20 /var/log/syslog</b>\n<b>tail -f /var/log/syslog</b>  <i># 实时跟踪，日志排错神器</i>\n<b>wc -l</b> /etc/passwd  <i># 数行数</i>\n<b>grep -n root</b> /etc/passwd  <i># 找关键字并显示行号</i>",
+  k:"找出系统里 UID 为 0 的行（只有 root 是 0）；找出最近 20 条报错；用 tail -f 跟踪日志，然后另开终端制造一条日志，看它是否实时出现。",
+  p:"会用 tail -f 看日志并用 Ctrl+C 退出；知道 grep -n 的行号怎么配合编辑器跳转。"},
+ {t:"改文件：nano 与重定向",g:"改配置的两条路：编辑器 or 重定向",
+  c:"<b>nano /root/cloud-lab/notes/today.md</b>\n  <i># Ctrl+O 保存 · Ctrl+X 退出 · Ctrl+W 搜索</i>\n<b>echo 'hello' &gt; a.txt</b>   <i># &gt; 覆盖写</i>\n<b>echo 'world' &gt;&gt; a.txt</b>  <i># &gt;&gt; 追加写</i>\n<b>cat &gt;&gt; /etc/hosts</b>      <i># 往文件末尾追加，改 DNS 常用</i>\n<b>cp a.txt b.txt</b> &amp;&amp; mv b.txt c.txt &amp;&amp; rm c.txt",
+  k:"用 echo 追加的方式，往 /etc/hosts 里加两行解析记录（自己编的域名即可），用 getent hosts 验证生效。",
+  p:"分清 &gt; 和 &gt;&gt;；会用 nano 保存退出；知道为什么改 hosts 后要确认生效而不是重启。"},
+ {t:"权限与用户：755 到底是什么",g:"赛场一半的丢分点在这里",
+  c:"<b>ls -l</b>  <i># 看 -rwxr-xr-x</i>\n  <i>rwx | r-x | r-x  = 属主 | 属组 | 其他人</i>\n  <i>r=4 w=2 x=1  → 7=4+2+1, 5=4+1, 6=4+2, 4=只读</i>\n<b>chmod 755</b> script.sh\n<b>chmod +x</b> script.sh    <i># 只加执行位，最常用</i>\n<b>chown user:group</b> file\n<b>id</b> / <b>whoami</b>\n<b>su - student</b>  <b>exit</b>",
+  k:"建两个用户 a、b，a 建一个文件，先 600 让 b 读不了，改成 644 再读；改成 700 让 b 进不了目录。亲手被拒一次才记得住。",
+  p:"看到 -rwxr-xr-x 能在 3 秒内翻译成「属主全权 / 属组读写执行 / 其他人读写执行」；知道 chmod 700 和 755 的区别。"},
+ {t:"压缩、打包、传输",g:"赛场交付物基本都是压缩包",
+  c:"<b>tar czf</b> backup-$(date +%F).tgz /etc   <i># c 压缩 z gzip f 文件</i>\n<b>tar xzf</b> backup.tgz -C /tmp/      <i># 解到指定目录</i>\n<b>tar tzf</b> backup.tgz | head         <i># 先看里面有什么，别乱解</i>\n<b>zip -r</b> a.zip dir/   <b>unzip</b> a.zip\n<b>scp</b> file user@ip:/tmp/   <b>rsync -avz</b> src/ dst/",
+  k:"把 /etc/nginx 打包成 tgz，删掉原目录，再解回原位并 diff 验证一致；用 scp 把包传到 localhost。",
+  p:"能不查资料写出 tar czf 和 tar xzf；知道解包前先 tar tzf 看一眼的习惯。"},
+ {t:"管道与重定向（真正的效率来源）",g:"Linux 的灵魂在这条竖线",
+  c:"<b>ps aux | grep nginx</b>\n<b>ps aux | grep [n]ginx</b>   <i># 防 grep 匹配到自己</i>\n<b>ss -tlnp</b>              <i># 谁在监听哪些端口</i>\n<b>cat /etc/nginx/nginx.conf | grep -n listen</b>\n<b>ls -lhS /</b>             <i># 按大小排</i>\n<b>find /etc -name '*.conf' -mtime -1</b>\n<b>command 2&gt;/dev/null |</b> command2",
+  k:"找出所有正在监听的端口；找出 /etc 下 24 小时内改过的 .conf；列出 / 目录最大的 5 项。",
+  p:"知道 | 把上一个命令的输出接给下一个；会用 2&gt;/dev/null 藏错误信息；会用 grep [x] 防自匹配。"},
+ {t:"第 1 周验收",g:"不看教程，做一遍",
+  c:"<b>mkdir -p</b> ~/cloud-lab/{notes,scripts}   <i># 建结构</i>\n<b>nano</b> ~/cloud-lab/notes/today.md        <i># Ctrl+O 保存 Ctrl+X 退出</i>\n<b>cat &gt;&gt;</b> /etc/hosts                    <i># &gt;&gt; 是追加，别写成单 &gt;</i>\n<b>chmod</b> +x ~/cloud-lab/scripts/hello.sh   <i># 只加执行位</i>\n<b>tar czf</b> backup-$(date +%F).tgz /etc    <i># 打包带日期</i>\n<b>tar tzf</b> backup.tgz | head             <i># 先看再解</i>\n<b>du -ah / | sort -rh | head -3</b>          <i># 找最大的三个</i>\n<b>ssh-keygen -t ed25519</b>                  <i># 一路回车</i>\n<b>tail -f</b> /var/log/syslog               <i># Ctrl+C 退出</i>",
+  k:"在一台干净的机器上，<b>不用任何搜索</b>完成：① 建目录结构 ② 写一个脚本并赋予执行权限 ③ 让它能跑 ④ 把结果打包 ⑤ 用管道找出最大的三个文件 ⑥ 用 ssh-keygen 生成密钥对 ⑦ 用 tail -f 观察一个服务日志。",
+  p:"七件事全部独立完成 = 进入第 2 周。<b>有任何一件需要现查，重复该天。</b>"}
+]},
+{w:"第 2 周 · 会管（把系统当服务器）",d:[
+ {t:"systemd：服务的生死",g:"赛场一半分数靠它",
+  c:"<b>systemctl status nginx</b>\n<b>systemctl start</b> / <b>stop</b> / <b>restart</b> nginx\n<b>systemctl enable</b> nginx   <i># 开机自启</i>\n<b>systemctl list-units --type=service --state=running</b>\n<b>systemctl cat</b> nginx     <i># 看它到底怎么启动的</i>\n<b>journalctl -u nginx -n 50 --no-pager</b>\n<b>journalctl -u nginx -f</b>      <i># 实时跟（排错核心）</i>",
+  k:"装 nginx，手动 start，再 stop，再 enable，然后重启机器验证它自己起来了。故意写坏配置（删掉一个大括号），restart 看失败日志并修好。",
+  p:"journalctl -u 服务名 -f 能熟练使用；知道 enable 和 start 的区别（一个管开机，一个管现在）。"},
+ {t:"安装软件：apt / dnf / systemctl 三件套",g:"赛场 90% 的时间在这",
+  c:"<b>apt update</b> &amp;&amp; <b>apt install -y</b> nginx\n<b>apt remove</b> nginx   <b>apt autoremove</b>\n<b>apt-cache policy</b> nginx  <i># 版本与来源</i>\n<b>dpkg -l | grep nginx</b>  <b>dpkg -L nginx</b>\n<b>apt list --installed | wc -l</b>\n<i>-- RHEL 系 --</i>\n<b>dnf install -y</b> nginx  <b>dnf list installed</b>  <b>rpm -ql nginx</b>",
+  k:"用 apt 装 haproxy 并启动；查它装了哪些文件（dpkg -L）；卸掉再装回来，验证可重复。",
+  p:"会查某个包提供哪些文件（dpkg -L / rpm -ql）；知道 update 和 upgrade 的区别。"},
+ {t:"进程与资源",g:"机器卡了先看这里",
+  c:"<b>ps aux</b> / <b>ps -ef</b> / <b>ps -u root -o pid,cmd</b>\n<b>top</b>  <i># q 退出 · P 按 CPU 排 · M 按内存排</i>\n<b>htop</b>  <i># 更好用，装不上就用 top</i>\n<b>kill 1234</b>   <b>kill -9 1234</b>  <i># -9 是最后手段</i>\n<b>free -h</b>   <b>df -h</b>   <b>uptime</b>\n<b>du -sh</b> /var/lib/*  <i># 找谁在吃盘</i>",
+  k:"跑一个 while 死循环把 CPU 吃满，用 top 找到它 PID 并结束；用 du 找出 /var 下最大的目录。",
+  p:"能在 30 秒内用 top/htop 定位到吃资源的进程；知道 kill 与 kill -9 的区别。"},
+ {t:"用户、组、sudo 与提权",g:"赛场账号规划也是分",
+  c:"<b>useradd -m -s /bin/bash</b> student\n<b>passwd</b> student\n<b>usermod -aG sudo</b> student  <i># 加入 sudo 组</i>\n<b>groupadd</b> devops\n<b>usermod -aG devops</b> student\n<b>id student</b>            <i># 看组</i>\n<b>groups</b> / <b>sudo -l</b>\n<b>chown -R student:devops</b> /srv/app",
+  k:"建 student 用户并给它 sudo；建 devops 组并加入；把 /srv/app 的属主改成 student:devops，验证权限生效。",
+  p:"知道 -aG（追加组，不加 -a 会覆盖原有组，这是经典错）；会用 id 验证组是否真的加上了。"},
+ {t:"定时任务 crontab",g:"自动化交付的起点",
+  c:"<b>crontab -e</b>     <i># 编辑当前用户计划任务</i>\n<b>crontab -l</b>     <i># 查看</i>\n<b>crontab -r</b>     <i># 清空（危险）</i>\n<i>格式：分 时 日 月 周  命令</i>\n<b>*/5 * * * *</b> /root/backup.sh &gt;/dev/null 2&gt;&amp;1\n<b>0 3 * * *</b> /root/backup.sh      <i># 每天 3:00</i>\n<b>0 3 * * 5</b> /root/weekly.sh     <i># 每周五 3:00</i>",
+  k:"写一个每 2 分钟往日志追加一行时间戳的脚本，设成定时任务；等两分钟在日志里看到输出。",
+  p:"能默写五段式格式；知道要写全路径、要把输出重定向掉（否则邮件爆炸）。"},
+ {t:"磁盘、分区与 LVM 概念",g:"不用会 parted，但必须懂挂载",
+  c:"<b>df -hT</b>            <i># 用量 · 文件系统类型</i>\n<b>df -i</b>             <i># inode 用量（写不进去时查这个）</i>\n<b>lsblk</b>   <b>fdisk -l</b>\n<b>mount</b> /dev/sdb1 /mnt   <b>umount</b> /mnt\n<b>blkid</b>\n<b>/etc/fstab</b>      <i># 开机自动挂载</i>\n<b>du -xh --max-depth=1 / | sort -h</b> | tail",
+  k:"挂载一个分区（或用 loop 设备模拟）并写进 fstab，重启验证自动挂载；把 df -i 跑一遍。",
+  p:"能一眼从 df 看出哪个盘快满了；知道 inode 耗尽也会导致写不进文件。"},
+ {t:"第 2 周验收",g:"装一整套服务出来",
+  c:"<b>apt update &amp;&amp; apt install -y</b> nginx haproxy mariadb-server\n<b>systemctl enable --now</b> nginx haproxy mariadb\n<b>systemctl is-active</b> nginx haproxy mariadb    <i># 三个都要 active</i>\n<b>systemctl list-units --type=service --state=running</b> | wc -l\n<b>nginx -t</b>                                  <i># 改完配置必查语法</i>\n<b>mysql -u root</b> 进库后建库建用户授权          <i># 命令见第 9 天</i>\n<b>crontab -e</b>                                 <i># 加一条备份任务</i>\n<b>reboot</b>                                     <i># 重启后验证三个服务都自启了</i>",
+  k:"不用查资料：装 nginx + haproxy + mariadb 三个服务；nginx 配一个站点；mariadb 建库建用户；三个服务全部 enable；mariadb 写一条备份脚本挂到 crontab；重启机器后验证全部自动起来。<b>最后打一个快照，命名 ready-week2。</b>",
+  p:"重启后三个服务都是 active = 进入第 3 周。<b>有任何一项没起来，回去查 enable。</b>"}
+]},
+{w:"第 3 周 · 会修（赛场拿分的关键）",d:[
+ {t:"网络基础：IP / 端口 / 网关 / DNS",g:"四样东西，赛场天天用",
+  c:"<b>ip a</b> / <b>ip -4 a</b>   <i># 本机地址</i>\n<b>ip r</b>            <i># 路由表 = 去哪走哪</i>\n<b>ping</b> -c3 8.8.8.8   <i># 通不通外网</i>\n<b>ping</b> -c3 <i>域名</i>  <i># 通不通 DNS</i>\n<b>ss -tlnp</b>          <i># 谁在监听</i>\n<b>curl -I</b> http://本机   <i># 看响应头，比浏览器快</i>\n<b>nslookup</b> / <b>dig +short</b> x.com\n<b>traceroute</b> / <b>mtr</b> 8.8.8.8",
+  k:"从「ping 不通域名但 ping 得通 IP」出发，定位到 DNS 问题并修好；找出本机所有监听端口及其对应进程。",
+  p:"能区分「网络不通」和「DNS 不通」；会用 ss -tlnp 找出占用端口的进程。"},
+ {t:"SSH 与远程管理（赛场基本功）",g:"所有交付都在 SSH 里做",
+  c:"<b>ssh</b> user@ip        <i># 首次问 yes</i>\n<b>ssh -p 2222</b> user@ip\n<b>scp</b> a.txt user@ip:/tmp/\n<b>rsync -avz</b> src/ user@ip:/dst/\n<b>ssh-keygen -t ed25519</b>\n<b>ssh-copy-id</b> user@ip\n<b>tail -f ~/.ssh/authorized_keys</b>   <i># 看谁在登我</i>",
+  k:"给自己配密钥登录并关闭密码登录（改完别把自己关门外——<b>先另开一个终端验证能登上再关</b>）；配一台免密互信。",
+  p:"能用密钥免密登录；改 sshd_config 前知道要保持第二个会话；知道 authorized_keys 的作用。"},
+ {t:"SSH 加固（世赛直接考）",g:"KSOS 考纲里明写的一项",
+  c:"/etc/ssh/sshd_config：\n<b>PermitRootLogin</b> no\n<b>PasswordAuthentication</b> no\n<b>PubkeyAuthentication</b> yes\n<b>Port</b> 2222\n<b>AllowUsers</b> deploy\n<b>MaxAuthTries</b> 3\n<b>sshd -t</b>  <i># 改完必查语法！</i>\n<b>systemctl restart ssh</b>",
+  k:"按上面 6 项加固 sshd，每改一次都先 sshd -t 再重启；<b>全程保持一个已登录的备用终端</b>。最后验证另一个普通用户仍能密钥登录。",
+  p:"理解每一项在防什么；养成「先 -t 后重启」的习惯；被自己关在门外的经历（如果发生了）。"},
+ {t:"排障六步法（背下来）",g:"世赛 3/4 时间在排障",
+  c:"<b>①</b> 现象：报错原文抄下来，别凭记忆\n<b>②</b> 日志：journalctl -u X -n 100 --no-pager\n<b>③</b> 端口：ss -tlnp ｜ 谁在听\n<b>④</b> 配置：改完 nginx -t / dnsmasq --test\n<b>⑤</b> 资源：df -h ｜ free -h ｜ uptime\n<b>⑥</b> 资源：top 看有没有僵尸/CPU 打满\n<b>⑦</b> 复验：改回来必须重新验证一次",
+  k:"用故障注入练：跑 <code>bash labs/cloudlab/fault/make_fault_l1.sh</code> 制造故障，然后<b>不看答案</b>用六步法定位并修好，限时 15 分钟。",
+  p:"能在 10 分钟内用六步法定位一个未知故障；关键是「分层」而不是「猜」。"},
+ {t:"Shell 脚本（自动化交付的入场券）",g:"赛场不会给你时间手敲",
+  c:"<b>#!/bin/bash</b>   <i># 第一行，少了可能不报错但行为诡异</i>\n<b>set -euo pipefail</b>   <i># 出错即停 · 未定义变量报错 · 管道出错</i>\n<b>for</b> h in web1 web2; <b>do</b> ssh $h 'uptime'; <b>done</b>\n<b>if</b> systemctl is-active nginx; <b>then</b> echo up; <b>fi</b>\n<b>while read</b> ip; <b>do</b> ping -c1 $ip; <b>done</b> &lt; ips.txt\n<b>$(date +%F)</b>   <b>$(hostname -I | awk '{print $1}')</b>\n<b>tee</b> -a /var/log/deploy.log   <i># 屏幕和文件同时</i>",
+  k:"写一个巡检脚本：依次检查 3 个服务是否 active、磁盘是否超 80%、内存是否够，把结果写进带日期的日志。跑它，然后故意停掉一个服务再跑，看它报出来。",
+  p:"会写带判断和循环的脚本；知道 set -euo pipefail；会用 tee -a 留痕。"},
+ {t:"自动化雏形：批量 + 幂等",g:"世赛评分认幂等",
+  c:"<b>for</b> ip in 192.168.100.1{1..5}; <b>do</b>\n  ssh root@$ip 'id nginx >/dev/null 2>&1 || apt install -y nginx'\n  ssh root@$ip 'systemctl enable --now nginx'\n<b>done</b>\n<i># 幂等：跑第二遍结果必须一样</i>\n<i># 检查脚本：bash -n x.sh · shellcheck x.sh</i>",
+  k:"写一个批量脚本给 3 台机器装 nginx 并设为开机自启；<b>连跑三遍</b>，用 diff 验证输出无差异（这才是幂等）。用 shellcheck 改掉所有告警。",
+  p:"能说清「幂等」是什么意思并用脚本验证；跑过 shellcheck 并能看懂 CSC 提示。"},
+ {t:"第 3 周验收 + 转向云",g:"这是分水岭",
+  c:"<b>bash</b> setup/check-env.sh                        <i># 环境体检</i>\n<b>sudo bash</b> labs/cloudlab/grade/grade_l1.sh       <i># L1 验收，逐项 PASS/FAIL</i>\n<b>sudo bash</b> labs/cloudlab/grade/grade_l1.sh -v    <i># 复盘：看每项检查逻辑</i>\n<b>sudo bash</b> labs/cloudlab/grade/grade_l2.sh       <i># L2 网络服务</i>\n<b>bash</b> labs/cloudlab/fault/make_fault_l1.sh       <i># 造故障练排障</i>\n<b>ip a</b> · <b>ss -tlnp</b> · <b>journalctl -u nginx -n 50 --no-pager</b>\n<b>bash -n</b> myscript.sh &amp;&amp; <b>shellcheck</b> myscript.sh\n<b>tar czf</b> 环境快照-$(date +%F).tgz /etc ~/cloud-lab",
+  k:"<b>①</b> 跑 <code>sudo bash labs/cloudlab/grade/grade_l1.sh</code>（带 -v 看复盘），目标全绿<br>"
+    +"<b>②</b> 跑 <code>grade_l2.sh</code>，把失分项对应回教程章节补齐<br>"
+    +"<b>③</b> 然后开 <a href=\"sim/index.html\">模拟中心</a>，选一套全真卷，<b>计时开考</b><br>"
+    +"<b>④</b> 交卷后写复盘：失分项 → 对应教程 → 下次怎么防",
+  p:"L1 全绿 = 你已经能上赛场了。之后就是<b>刷卷 + 复盘 + 补短板</b>的循环，直到比赛那天。"}
+]}
+];
+
+var KEY='ccl:linuxplan:v1';
+var st=load(); var S=st.done||{}; var last=st.last||'';
+
+function load(){ try{ var v=JSON.parse(localStorage.getItem(KEY)); return v||{}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify({done:S,last:last})); }catch(e){} }
+function today(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function streak(){
+  var n=0,d=new Date();
+  for(var i=0;i<400;i++){
+    var k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(S[k]) { n++; d.setDate(d.getDate()-1); } else if(i===0){ d.setDate(d.getDate()-1); } else break;
+  }
+  return n;
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function md(s){return String(s).replace(/`([^`]+)`/g,'<code>$1</code>');}
+
+function render(){
+  var html='', idx=0;
+  DAYS.forEach(function(wk,wi){
+    html+='<h2 class="sec">'+esc(wk.w)+'</h2>';
+    wk.d.forEach(function(d){
+      idx++;
+      var key='d'+idx, on=!!S[key];
+      html+='<div class="day'+(on?' done':'')+'" id="'+key+'">'
+        +'<div class="day-h"><div class="dn">'+idx+'</div>'
+        +'<div class="dt"><b>'+esc(d.t)+'</b><span>'+esc(d.g)+'</span></div>'
+        +'<input type="checkbox" class="ck" data-k="'+key+'"'+(on?' checked':'')+' aria-label="完成第'+idx+'天"></div>'
+        +'<div class="day-b">'
+        +'<div class="cmd">'+d.c+'</div>'
+        +'<p><b>动手任务：</b>'+md(d.k)+'</p>'
+        +'<div class="pass-box"><b>过关自测：</b>'+md(d.p)+'</div>'
+        +'<div class="small">对应教程：'
+        +'<a href="docs/tutorial/README-教程总览.md">教程总览</a> · '
+        +'<a href="labs/cloudlab/tasks/L1-Linux.md">L1 任务书</a> · '
+        +'<a href="https://taimabenji.github.io/knowledge-commons/learn/cloud/week1.html">七天开蒙</a></div>'
+        +'</div></div>';
+    });
+  });
+  document.getElementById('weeks').innerHTML=html;
+
+  var done=0,total=0;
+  Object.keys(S).forEach(function(k){ if(k.indexOf('d')===0&&S[k]) done++; });
+  total=DAYS.reduce(function(a,w){return a+w.d.length;},0);
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-streak').textContent=streak();
+  document.getElementById('s-time').textContent=done;
+  document.getElementById('s-bar').style.width=(total?Math.round(done/total*100):0)+'%';
+}
+
+document.addEventListener('change',function(e){
+  var c=e.target.closest('[data-k]'); if(!c) return;
+  var k=c.getAttribute('data-k');
+  if(c.checked){ S[k]=today(); c.closest('.day').classList.add('done'); }
+  else { delete S[k]; c.closest('.day').classList.remove('done'); }
+  save(); render();
+});
+document.addEventListener('click',function(e){
+  var h=e.target.closest('.day-h');
+  if(h && !e.target.closest('.ck')){
+    var b=h.nextElementSibling;
+    b.style.display=(b.style.display==='none')?'block':'none';
+  }
+});
+document.getElementById('btn-print').addEventListener('click',function(){
+  document.querySelectorAll('.day-b').forEach(function(x){x.style.display='block';});
+  window.print();
+});
+document.getElementById('btn-reset').addEventListener('click',function(){
+  if(confirm('清空全部 21 天的完成记录？此操作不可撤销。')){ S={}; save(); render(); }
+});
+render();
+</script>
+</body>
+</html>

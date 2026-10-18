@@ -47,6 +47,8 @@
   <a href="https://taimabenji.github.io/knowledge-commons/learn/skills.html">世赛</a>
   <a href="https://taimabenji.github.io/knowledge-commons/learn/cloud/index.html">云赛</a>
   <a class="on" href="start.html">首赛</a>
+  <a href="linux-plan.html">Linux计划</a>
+  <a href="setup/README.md">装环境</a>
   <a href="week1.html">开蒙卡</a>
   <a href="sprint.html">冲刺30天</a>
   <a href="sim/index.html">模拟中心</a>
@@ -68,7 +70,19 @@
   </div>
 
   <div class="card">
-    <p>👶 <b>今天先做这 3 件事（10 分钟）</b>：① 填上方日期；② 做 <a href="week1.html">七天开蒙卡</a>第 1 天（装一台 Linux）；③ 把本页「添加到主屏幕」，每天来看一次。</p>
+    <p>👶 <b>今天先做这 3 件事（10 分钟）</b>：① 填上方日期；② 装好 Linux（见上）；③ 做 <a href="linux-plan.html">Linux 21 天计划</a>第 1 天；④ 把本页「添加到主屏幕」，每天来看一次。</p>
+  </div>
+
+  <div class="card" style="border:2px solid #9e2b25;background:#fff8f4">
+    <p><b>🖥 零基础第一步：先在你自己的电脑上把 Linux 装好</b>（5 分钟，之后全程离线）</p>
+    <ul class="list">
+      <li><span class="t"><b>Windows</b> —— 管理员 PowerShell 里执行一行：<br>
+        <code style="display:block;background:#22201d;color:#e8e2d6;padding:9px 11px;border-radius:5px;font-size:12.5px;overflow-x:auto">irm https://raw.githubusercontent.com/TaiMaBenJi/cloud-computing-learning/main/setup/setup-windows.ps1 | iex</code>
+        <span class="small">会自动装 WSL2 + Ubuntu 24.04 + <b>打开 systemd</b>（关键，缺了 systemctl 全废）；首次需重启，重启后再跑一遍</span></span><span class="n">Win</span></li>
+      <li><span class="t"><b>macOS / 已有 Linux</b> —— <code>bash setup/setup-linux.sh</code>　<b>已有环境</b>跳过安装，直接体检</span><span class="n">Mac/Linux</span></li>
+      <li><span class="t"><b>装完必做体检</b> —— <code>bash setup/check-env.sh</code>，全绿再开练。详细图文见 <a href="setup/README.md">setup/README.md</a></span><span class="n">必做</span></li>
+    </ul>
+    <p style="margin-top:10px">环境稳了之后 → <a href="linux-plan.html"><b>Linux 21 天每日计划</b></a>（每天 60–90 分钟，一张卡：命令 / 任务 / 过关自测，进度存本机）→ 再回本页走 30 天作战板。</p>
   </div>
 
   <div id="todayBox"></div>

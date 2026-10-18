@@ -21,11 +21,33 @@
 - 🧪 **给要动手的人**：OpenStack / Kubernetes 一键实验脚本 + 四层通关任务书
 - 📚 **给想系统学的人**：20 章保姆级教程 + 官方职业标准中文版 + 21 套真题题库
 
+## 🖥 第一步：先在你自己的电脑上装好 Linux
+
+> 零基础最常卡住的就是这一步，所以做成一键脚本了。
+
+| 你的系统 | 一条命令 | 说明 |
+|---|---|---|
+| **Windows** | `irm https://raw.githubusercontent.com/TaiMaBenJi/cloud-computing-learning/main/setup/setup-windows.ps1 \| iex` | 管理员 PowerShell 里执行。自动装 WSL2 + Ubuntu 24.04 + **打开 systemd**（关键）。首次需重启，重启后再跑一遍 |
+| **macOS** | `bash setup/setup-linux.sh` | 系统自带 Linux 环境，装依赖即可 |
+| **已有 Linux/WSL** | `bash setup/setup-linux.sh` | 同上 |
+
+装完**必做体检**：`bash setup/check-env.sh`　（全绿再开练；`-v` 看逐项依据）
+
+图文版（含每一步的坑）：**[`setup/README.md`](setup/README.md)**
+
+| 文件 | 内容 |
+|---|---|
+| [`setup/setup-linux.sh`](setup/setup-linux.sh) | 练习环境一键安装（幂等、可重复执行；`NO_DOCKER=1` / `NO_K8S=1` 可跳段） |
+| [`setup/setup-windows.ps1`](setup/setup-windows.ps1) | Windows 一键：WSL2 + Ubuntu + systemd + 拉仓库 + 装依赖 |
+| [`setup/check-env.sh`](setup/check-env.sh) | 环境体检，告诉你这台机器到底行不行 |
+| [`linux-plan.html`](linux-plan.html) | **Linux 21 天每日计划** · 每天一张卡：命令 / 动手任务 / 过关自测，进度存本机，可打印 |
+
 ## 🚀 三步开始
 
-1. **打开 [30 天作战板](start.html)** —— 填上你的比赛日期，看今天该做什么
-2. **照 Day 1 做** —— 装一台 Linux（Ubuntu/CentOS 虚拟机或云主机都行）
-3. **每周末打一卷** —— 打开 [模拟中心](sim/index.html)，计时、评分、复盘
+1. **装环境** —— 跑 `setup/` 里对应你系统的那条命令，然后 `bash setup/check-env.sh` 体检
+2. **打地基** —— 打开 [Linux 21 天计划](linux-plan.html)，每天 60–90 分钟，一张卡照做
+3. **开练** —— 打开 [30 天作战板](start.html) 填上比赛日期，按表推进
+4. **每周末打一卷** —— 打开 [模拟中心](sim/index.html)，计时、评分、复盘
 
 > 不想装环境？直接看 [教程](docs/tutorial/README-教程总览.md) 和 [真题题库](papers/真题题库-21套.md)，纸上也能先入门。
 
@@ -34,6 +56,8 @@
 | 目录 / 文件 | 内容 |
 |---|---|
 | [`start.html`](start.html) | **首赛倒计时 · 30 天作战板**（倒计时 + 逐日任务 + 打勾进度） |
+| [`setup/`](setup/README.md) | **在自己电脑上装环境**：Windows/macOS/Linux 一键脚本 + 环境体检 |
+| [`linux-plan.html`](linux-plan.html) | **Linux 21 天每日计划**：会用 → 会管 → 会修，每天带过关自测 |
 | [`week1.html`](week1.html) | 七天开蒙卡（零基础第一周） |
 | [`sprint.html`](sprint.html) | 30 天冲刺手册（完整版方法论） |
 | [`sim/`](sim/index.html) | **全赛模拟中心**：7 套全真卷 + [计时执行器](sim/sim.html) |
